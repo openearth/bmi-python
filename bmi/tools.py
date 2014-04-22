@@ -3,14 +3,12 @@
 """
 Run subgrid as a python script with colored output
 """
-import os
 import argparse
-import sys
-
 
 from .wrapper import BMIWrapper
 
 # do colorlogs here
+
 
 def parse_args():
     """
@@ -23,12 +21,14 @@ def parse_args():
     arguments = argumentparser.parse_args()
     return arguments
 
+
 def runner():
     """main program"""
     arguments = parse_args()
     # Read input file file
     with BMIWrapper(engine=arguments.engine, config=arguments.file) as model:
         t_end = model.get_end_time()
+        t = 0
         while t < t_end:
-            t = subgrid.get_current_time()
-            subgrid.update(-1)
+            t = model.get_current_time()
+            model.update(-1)
