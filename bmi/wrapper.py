@@ -10,8 +10,6 @@ import logging
 import os
 import multiprocessing          # for shared memory
 import platform
-import inspect
-import json
 import sys
 
 import faulthandler
@@ -20,6 +18,7 @@ from numpy.ctypeslib import ndpointer  # nd arrays
 import numpy as np
 import pandas
 
+logger = logging.getLogger(__name__)
 
 from ctypes import (
     # Types
@@ -83,8 +82,6 @@ TYPEMAP = {
 }
 
 
-
-
 def struct2dict(struct):
     """convert a ctypes structure to a dictionary"""
     return {x: getattr(struct, x) for x in dict(struct._fields_).keys()}
@@ -120,8 +117,6 @@ SHAPEARRAY = ndpointer(dtype='int32',
                        ndim=1,
                        shape=(MAXDIMS,),
                        flags='F')
-
-
 
 
 try:
@@ -161,7 +156,6 @@ class BMIWrapper(object):
     """
     library = None
 
-
     def __init__(self, engine=None, config=None):
         """Initialize the class.
 
@@ -189,7 +183,6 @@ class BMIWrapper(object):
             '/usr/lib',
         ]
 
-
     def _libname(self):
         """Return platform-specific modelf90 shared library name."""
         prefix = 'lib'
@@ -200,7 +193,6 @@ class BMIWrapper(object):
             prefix = ''
             suffix = '.dll'
         return prefix + self.engine + suffix
-
 
     def _library_path(self):
         """Return full path to the shared library.
@@ -213,7 +205,6 @@ class BMIWrapper(object):
         If the library cannot be found, a ``RuntimeError`` with debug
         information is raised.
         """
-
 
         pathname = 'LD_LIBRARY_PATH'
         separator = ':'
@@ -229,7 +220,10 @@ class BMIWrapper(object):
         # Expand the paths with the system path if it exists
         if lib_path_from_environment:
             known_paths = [path for path in lib_path_from_environment.split(separator)]  + self.known_paths
-        known_paths = [os.path.expanduser(path) for path in self.known_paths]
+        else:
+            known_paths = self.known_paths
+        # expand ~
+        known_paths = [os.path.expanduser(path) for path in known_paths]
 
         possible_libraries = [os.path.join(path, self._libname())
                               for path in known_paths]
@@ -324,7 +318,6 @@ class BMIWrapper(object):
         self.library = self._load_library()
         self._annotate_functions()
         self.library.initialize(self.config)  # Fortran init function.
-
 
     def finalize(self):
         """Shutdown the library and clean up the model.
