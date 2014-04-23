@@ -129,6 +129,23 @@ except AttributeError:
     pass
 
 
+FUNCTIONS = [
+    {
+        'name': 'update',
+        'argtypes': [POINTER(c_double)],
+        'restype': c_int,
+    },
+    {
+        'name': 'initialize',
+        'argtypes': [],
+        'restype': c_int,
+    },
+    {
+        'name': 'finalize',
+        'argtypes': [],
+        'restype': c_int,
+    }
+]
 
 
 class BMIWrapper(object):
