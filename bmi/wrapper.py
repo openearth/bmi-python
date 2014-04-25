@@ -444,14 +444,6 @@ class BMIWrapper(object):
     # Change sliced to True, once we have a complete list of slices...
     def get_nd(self, name, sliced=False):
         """Return an nd array from model library"""
-        if not name in DOCUMENTED_VARIABLES:
-            # Enforcing documentation is really the only way to
-            # ensure, well, documentation. Irritating, yes, but it
-            # works. Document them in the ``DOCUMENTED_VARIABLES``
-            # dictionary near the top of this Python file.
-            msg = "Requesting variable '{}', but it isn't documented.".format(
-                name)
-            raise NotDocumentedError(msg)
         # How many dimensions.
         rank = self.get_var_rank(name)
         # The shape array is fixed size
