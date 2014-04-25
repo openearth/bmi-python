@@ -24,5 +24,8 @@ class TestCase(unittest.TestCase):
     def test_initialize(self):
         self.wrapper.initialize()
 
+    def test_finalize(self):
+        self.wrapper.finalize()
+
 if __name__ == '__main__':
     nose.main()
