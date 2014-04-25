@@ -26,7 +26,7 @@ def runner():
     """main program"""
     arguments = parse_args()
     # Read input file file
-    with BMIWrapper(engine=arguments.engine, config=arguments.file) as model:
+    with BMIWrapper(engine=arguments.engine, configfile=arguments.file) as model:
         t_end = model.get_end_time()
         t = 0
         while t < t_end:

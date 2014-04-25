@@ -7,6 +7,10 @@ module demo_model
   ! This is assumed.....
   integer(c_int), parameter :: MAXDIMS = 6
 
+  double precision, target :: t
+  double precision, target :: t_end
+  double precision, target :: t_start
+
   integer, target :: var1
   double precision, target :: var2(2)
   logical(c_bool), target :: var3(2,3)
@@ -32,6 +36,8 @@ contains
 
     ! Convert c string to fortran string
     ierr = 0
+    t = 0.0d0
+    t_end = 10.0d0
     configfile = char_array_to_string(c_configfile)
     write(*,*) 'Initializing with ', configfile
 
@@ -45,8 +51,14 @@ contains
     !< Custom timestep size, use -1 to use model default.
     real(c_double), intent(in) :: dt
 
+
     ierr = 0
     write(*,*) 'Updating with dt: ', dt
+    if (dt .eq. -1) then
+       t = t + 1.0d0
+    else
+       t = t + dt
+    end if
 
   end function update
 
@@ -120,6 +132,7 @@ contains
     end select
   end subroutine get_var_shape
 
+
   subroutine get_var(c_var_name, x) bind(C, name="get_var")
     !DEC$ ATTRIBUTES DLLEXPORT :: get_var
 
@@ -144,6 +157,29 @@ contains
 
   end subroutine get_var
 
+  subroutine get_current_time(time) bind(C, name="get_current_time")
+    !DEC$ ATTRIBUTES DLLEXPORT :: get_current_time
+
+    real(c_double) :: time
+    time = t
+
+  end subroutine get_current_time
+
+  subroutine get_start_time(time) bind(C, name="get_start_time")
+    !DEC$ ATTRIBUTES DLLEXPORT :: get_start_time
+
+    real(c_double) :: time
+    time = t_start
+
+  end subroutine get_start_time
+
+  subroutine get_end_time(time) bind(C, name="get_end_time")
+    !DEC$ ATTRIBUTES DLLEXPORT :: get_end_time
+
+    real(c_double) :: time
+    time = t_end
+
+  end subroutine get_end_time
 
 end module demo_model
 

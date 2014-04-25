@@ -441,6 +441,37 @@ class BMIWrapper(object):
         self.library.get_var_shape(name, shape)
         return tuple(shape[:rank])
 
+    def get_start_time(self):
+        """
+        returns start time
+        """
+        start_time = c_double()
+        self.library.get_start_time.argtypes = [POINTER(c_double)]
+        self.library.get_start_time.restype = None
+        self.library.get_start_time(byref(start_time))
+        return start_time.value
+
+    def get_end_time(self):
+        """
+        returns end time of simulation
+        """
+        end_time = c_double()
+        self.library.get_end_time.argtypes = [POINTER(c_double)]
+        self.library.get_end_time.restype = None
+        self.library.get_end_time(byref(end_time))
+        return end_time.value
+
+    def get_current_time(self):
+        """
+        returns current time of simulation
+        """
+        current_time = c_double()
+        self.library.get_current_time.argtypes = [POINTER(c_double)]
+        self.library.get_current_time.restype = None
+        self.library.get_current_time(byref(current_time))
+        return current_time.value
+
+
     # Change sliced to True, once we have a complete list of slices...
     def get_nd(self, name, sliced=False):
         """Return an nd array from model library"""

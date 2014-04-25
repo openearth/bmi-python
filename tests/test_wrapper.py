@@ -32,9 +32,36 @@ class TestCase(unittest.TestCase):
     def test_with(self):
         with self.wrapper:
             pass
+
     def test_update(self):
         with self.wrapper as model:
             model.update()
+
+    def test_start_time(self):
+        with self.wrapper as model:
+            self.assertEqual(0, model.get_start_time())
+
+    def test_current_time(self):
+        with self.wrapper as model:
+            self.assertEqual(0, model.get_current_time())
+
+    def test_end_time(self):
+        with self.wrapper as model:
+            self.assertEqual(10, model.get_end_time())
+
+    def test_update_time(self):
+        with self.wrapper as model:
+            self.assertEqual(0, model.get_current_time())
+            model.update()
+            self.assertEqual(1, model.get_current_time())
+
+    def test_update_twice(self):
+        with self.wrapper as model:
+            self.assertEqual(0, model.get_current_time())
+            model.update()
+            self.assertEqual(1, model.get_current_time())
+            model.update(5)
+            self.assertEqual(6, model.get_current_time())
 
 if __name__ == '__main__':
     nose.main()
