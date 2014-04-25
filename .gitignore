@@ -1,3 +1,24 @@
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Libraries
+*.lib
+*.a
+
+# Modules
+*.mod
+*.MOD
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
