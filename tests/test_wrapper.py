@@ -25,6 +25,7 @@ class TestCase(unittest.TestCase):
         self.wrapper.initialize()
 
     def test_finalize(self):
+        self.wrapper.initialize()
         self.wrapper.finalize()
 
 if __name__ == '__main__':

@@ -343,11 +343,10 @@ class BMIWrapper(object):
         changed back to the original one.
 
         """
-        if self.configfile:
-            logger.info('finalize...')
-            self.library.finalizemodel()
+        logger.info('finalize...')
+        self.library.finalize()
         logger.info('library shutdown...')
-        logger.info('chdir...')
+        logger.info('cd -')
         # del self.library  # This one doesn't work.
         os.chdir(self.original_dir)
 
