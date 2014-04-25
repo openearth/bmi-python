@@ -129,6 +129,7 @@ except AttributeError:
     pass
 
 
+# Wrap these functions
 FUNCTIONS = [
     {
         'name': 'update',
@@ -154,14 +155,14 @@ class BMIWrapper(object):
     There are two ways to use the wrapper. A handy way is as a context
     manager, so with a ``with`` statement::
 
-        with BMIWrapper(config='/full/path/model.mdu') as model:
+        with BMIWrapper(config='/full/path/model.ini') as model:
             # model is the wrapper around library.
             model.update(1.0)
 
     The second way is by calling :meth:`start` and :meth:`stop` yourself and
     using the :attr:`library` attribute to access the Fortran library::
 
-        wrapper = BMIWrapper(config='/full/path/model.mdu')
+        wrapper = BMIWrapper(config='/full/path/model.ini')
         wrapper.initalize()
         wrapper.update(1.0)
         ...
@@ -173,7 +174,7 @@ class BMIWrapper(object):
     """
     library = None
 
-    def __init__(self, engine=None, config=None):
+    def __init__(self, engine=None, configfile=None):
         """Initialize the class.
 
         The ``engine`` argument should be the path to a model's ``engine``
@@ -186,7 +187,7 @@ class BMIWrapper(object):
         :meth:`initialize` method.
         """
         self.engine = engine
-        self.config = config
+        self.configfile = configfile
         self.original_dir = os.getcwd()
 
         self.known_paths = [
@@ -310,16 +311,16 @@ class BMIWrapper(object):
             setattr(self, function['name'], f)
 
     def _load_model(self):
-        os.chdir(os.path.dirname(self.mdu) or '.')
+        os.chdir(os.path.dirname(self.configfile) or '.')
         logmsg = "Loading model {} in directory {}".format(
-            self.mdu,
+            self.configfile,
             os.path.abspath(os.getcwd())
         )
         logger.info(logmsg)
-        exit_code = self.library.loadmodel(self.mdu.encode("utf-8"))
+        exit_code = self.library.loadmodel(self.configfile.encode("utf-8"))
         if exit_code:
             errormsg = "Loading model {mdu} failed with exit code {code}"
-            raise RuntimeError(errormsg.format(config=self.mdu, code=exit_code))
+            raise RuntimeError(errormsg.format(config=self.configfile, code=exit_code))
 
     def initialize(self):
         """Initialize and load the Fortran library (and model, if applicable).
@@ -334,7 +335,7 @@ class BMIWrapper(object):
         """
         self.library = self._load_library()
         self._annotate_functions()
-        self.library.initialize(self.config)  # Fortran init function.
+        self.library.initialize(self.configfile)  # Fortran init function.
 
     def finalize(self):
         """Shutdown the library and clean up the model.
@@ -344,7 +345,7 @@ class BMIWrapper(object):
         changed back to the original one.
 
         """
-        if self.mdu:
+        if self.configfile:
             logger.info('finalize...')
             self.library.finalizemodel()
         logger.info('library shutdown...')
