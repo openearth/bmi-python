@@ -7,6 +7,7 @@ import bmi.wrapper
 class TestCase(unittest.TestCase):
     def setUp(self):
         self.wrapper = bmi.wrapper.BMIWrapper(engine="model", configfile="model.ini")
+        # find the model in this directory
         self.wrapper.known_paths += ['tests']
 
     @mock.patch('platform.system', lambda: 'Linux')
