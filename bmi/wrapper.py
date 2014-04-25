@@ -129,24 +129,6 @@ except AttributeError:
     pass
 
 
-# Wrap these functions
-FUNCTIONS = [
-    {
-        'name': 'update',
-        'argtypes': [POINTER(c_double)],
-        'restype': c_int,
-    },
-    {
-        'name': 'initialize',
-        'argtypes': [],
-        'restype': c_int,
-    },
-    {
-        'name': 'finalize',
-        'argtypes': [],
-        'restype': c_int,
-    }
-]
 
 
 class BMIWrapper(object):
@@ -258,57 +240,32 @@ class BMIWrapper(object):
         logger.info("Loading library from path {}".format(path))
         return cdll.LoadLibrary(path)
 
-    def _annotate_functions(self):
-        """Help ctypes by telling it type information about Fortran functions.
-
-        Functions in the loaded Fortran library are called through  The
-        variables inside Fortran don't automatically translate to and from
-        Python variables. We can help ctypes a lot by telling it about the
-        argument types and return type(s) of the various functions.
-
-        The annotations also make our own life easier as it allows ctypes to
-        do a lot of type conversions automatically for us. We can pass most
-        values without the need to convert to a pointer first.
-
-        On the wrapper.library the functions can be called as ctypes functions.
-        On the wrapper the functions can be called with python types.
-
+    @staticmethod
+    def wrap(func):
+        """Return wrapped function with type conversion and sanity checks.
         """
-        def wrap(func):
-            """Return wrapped function with type conversion and sanity checks.
-            """
-            @functools.wraps(func, assigned=('restype', 'argtypes'))
-            def wrapped(*args):
-                if len(args) != len(func.argtypes):
-                    logger.warn("{} {} not of same length",
-                                args, func.argtypes)
+        @functools.wraps(func, assigned=('restype', 'argtypes'))
+        def wrapped(*args):
+            if len(args) != len(func.argtypes):
+                logger.warn("{} {} not of same length",
+                            args, func.argtypes)
 
-                typed_args = []
-                for (arg, argtype) in zip(args, func.argtypes):
-                    if isinstance(argtype._type_, str):
-                        # create a string buffer for strings
-                        typed_arg = create_string_buffer(arg)
-                    else:
-                        # for other types, use the type to do the conversion
-                        typed_arg = argtype(argtype._type_(arg))
-                    typed_args.append(typed_arg)
-                result = func(*typed_args)
-                if hasattr(result, 'contents'):
-                    return result.contents
+            typed_args = []
+            for (arg, argtype) in zip(args, func.argtypes):
+                if isinstance(argtype._type_, str):
+                    # create a string buffer for strings
+                    typed_arg = create_string_buffer(arg)
                 else:
-                    return result
+                    # for other types, use the type to do the conversion
+                    typed_arg = argtype(argtype._type_(arg))
+                typed_args.append(typed_arg)
+            result = func(*typed_args)
+            if hasattr(result, 'contents'):
+                return result.contents
+            else:
+                return result
             return wrapped
-        for function in FUNCTIONS:
-            api_function = getattr(self.library, function['name'])
-            api_function.argtypes = function['argtypes']
-            api_function.restype = function['restype']
-            # decorate the function with type conversion, so we can pass in
-            # normal python stuff make sure the function properties are copied
-            # to the wrapper (normally copy __doc__ etc...)
-            # @functools.wraps(api_function,assigned=('restype','argtypes') )
-            f = wrap(api_function)
-            assert hasattr(f, 'argtypes')
-            setattr(self, function['name'], f)
+        return wrapped
 
     def initialize(self):
         """Initialize and load the Fortran library (and model, if applicable).
@@ -328,9 +285,10 @@ class BMIWrapper(object):
             os.path.abspath(os.getcwd())
         )
         logger.info(logmsg)
-        self._annotate_functions()
         # Fortran init function.
-        ierr = self.library.initialize(self.configfile)
+        self.library.initialize.argtypes = [c_char_p]
+        self.library.initialize.restype = c_int
+        ierr = self.wrap(self.library.initialize)(self.configfile)
         if ierr:
             errormsg = "Loading model {config} failed with exit code {code}"
             raise RuntimeError(errormsg.format(config=self.configfile, code=ierr))
@@ -344,11 +302,26 @@ class BMIWrapper(object):
 
         """
         logger.info('finalize...')
-        self.library.finalize()
-        logger.info('library shutdown...')
+        self.library.finalize.argtypes = []
+        self.library.finalize.restype = c_int
+        ierr = self.wrap(self.library.finalize)()
+        # always go back to previous directory
         logger.info('cd -')
-        # del self.library  # This one doesn't work.
+        # This one doesn't work.
         os.chdir(self.original_dir)
+        if ierr:
+            errormsg = "Finalizing model {engine} failed with exit code {code}"
+            raise RuntimeError(errormsg.format(engine=self.engine, code=ierr))
+
+    def update(self, dt=-1):
+        """
+        Return type string, compatible with numpy.
+        """
+        self.library.update.argtypes = [POINTER(c_double)]
+        self.library.update.restype = c_int
+        result = self.wrap(self.library.update)(dt)
+        return result
+
 
     # Variable Information Functions
     # Note that these call subroutines.

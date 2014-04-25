@@ -29,5 +29,12 @@ class TestCase(unittest.TestCase):
         self.wrapper.initialize()
         self.wrapper.finalize()
 
+    def test_with(self):
+        with self.wrapper:
+            pass
+    def test_update(self):
+        with self.wrapper as model:
+            model.update()
+
 if __name__ == '__main__':
     nose.main()
