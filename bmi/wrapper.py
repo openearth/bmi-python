@@ -129,8 +129,6 @@ except AttributeError:
     pass
 
 
-
-
 class BMIWrapper(object):
     """Wrapper around a ctypes-loaded BMI library.
 
