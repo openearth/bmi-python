@@ -174,13 +174,13 @@ class BMIWrapper(object):
     """
     library = None
 
-    def __init__(self, engine=None, configfile=None):
+    def __init__(self, engine, configfile):
         """Initialize the class.
 
         The ``engine`` argument should be the path to a model's ``engine``
         file, which is the library name without lib suffix and dylib/dll/so suffix.
-        The ``config`` argument should be the path to a model's ``*.config``
-        file.
+        The ``configfile`` argument should be the path to a model's ``*.ini``
+        file, or whatever is used for initialization.
 
         Nothing much should happen here so that the code remains easy to
         test. Most of the library-related initialization happens in the
@@ -310,32 +310,30 @@ class BMIWrapper(object):
             assert hasattr(f, 'argtypes')
             setattr(self, function['name'], f)
 
-    def _load_model(self):
-        os.chdir(os.path.dirname(self.configfile) or '.')
-        logmsg = "Loading model {} in directory {}".format(
-            self.configfile,
-            os.path.abspath(os.getcwd())
-        )
-        logger.info(logmsg)
-        exit_code = self.library.loadmodel(self.configfile.encode("utf-8"))
-        if exit_code:
-            errormsg = "Loading model {mdu} failed with exit code {code}"
-            raise RuntimeError(errormsg.format(config=self.configfile, code=exit_code))
-
     def initialize(self):
         """Initialize and load the Fortran library (and model, if applicable).
 
         The Fortran library is loaded and ctypes is used to annotate functions
         inside the library. The Fortran library's initialization is called.
 
-        Normally a path to an ``*.mdu`` model file is passed to the
+        Normally a path to an ``*.ini`` model file is passed to the
         :meth:`__init__`. If so, that model is loaded. Note that
         :meth:`_load_model` changes the working directory to that of the model.
 
         """
         self.library = self._load_library()
+        os.chdir(os.path.dirname(self.configfile) or '.')
+        logmsg = "Loading model {} in directory {}".format(
+            self.configfile,
+            os.path.abspath(os.getcwd())
+        )
+        logger.info(logmsg)
         self._annotate_functions()
-        self.library.initialize(self.configfile)  # Fortran init function.
+        # Fortran init function.
+        ierr = self.library.initialize(self.configfile)
+        if ierr:
+            errormsg = "Loading model {config} failed with exit code {code}"
+            raise RuntimeError(errormsg.format(config=self.configfile, code=ierr))
 
     def finalize(self):
         """Shutdown the library and clean up the model.
