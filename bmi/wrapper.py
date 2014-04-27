@@ -57,6 +57,32 @@ def create_string_buffer(init, size=None):
         return buf
     raise TypeError(init)
 
+# Transform python log integers to log4j, log4net numbers, as used in fortran
+LEVELS_PY2F = {
+    logging.NOTSET: 0,
+    logging.DEBUG: 1,
+    logging.INFO: 2,
+    logging.WARN: 3,
+    logging.ERROR: 4,
+    logging.FATAL: 5
+}
+
+LEVELS_F2PY = dict(zip(LEVELS_PY2F.values(), LEVELS_PY2F.keys()))
+LEVELS_F2PY[6] = logging.FATAL
+# level OFF
+
+
+
+# We need this defined global, otherwise we get a segfault
+def fortran_log(level_p, message):
+    """python logger to be called from fortran"""
+    f_level = level_p.contents.value
+    level = LEVELS_F2PY[f_level]
+    logger.log(level, message)
+
+# define the type of the fortran function
+fortran_log_functype = CFUNCTYPE(None, POINTER(c_int), c_char_p)
+fortran_log_func = fortran_log_functype(fortran_log)
 
 # maximum rank
 MAXDIMS = 6
@@ -113,6 +139,36 @@ def structs2pandas(structs):
     return df
 
 
+def wrap(func):
+    """Return wrapped function with type conversion and sanity checks.
+    """
+    @functools.wraps(func, assigned=('restype', 'argtypes'))
+    def wrapped(*args):
+        if len(args) != len(func.argtypes):
+            logger.warn("{} {} not of same length",
+                        args, func.argtypes)
+
+        typed_args = []
+        for (arg, argtype) in zip(args, func.argtypes):
+            if isinstance(argtype._type_, str):
+                # create a string buffer for strings
+                typed_arg = create_string_buffer(arg)
+            else:
+                # for other types, use the type to do the conversion
+                typed_arg = argtype(argtype._type_(arg))
+            typed_args.append(typed_arg)
+        result = func(*typed_args)
+        if hasattr(result, 'contents'):
+            return result.contents
+        else:
+            return result
+        return wrapped
+    return wrapped
+
+
+
+
+
 SHAPEARRAY = ndpointer(dtype='int32',
                        ndim=1,
                        shape=(MAXDIMS,),
@@ -154,6 +210,17 @@ class BMIWrapper(object):
     """
     library = None
 
+    known_paths = [
+        # From very specific to generic. Local installs win,
+        # and /opt/modelname wins over system installs.
+        '.',
+        '~/local/lib',
+        '~/.local/lib',
+        '/usr/local/lib',
+        '/usr/lib',
+    ]
+
+
     def __init__(self, engine, configfile):
         """Initialize the class.
 
@@ -170,16 +237,8 @@ class BMIWrapper(object):
         self.configfile = configfile
         self.original_dir = os.getcwd()
 
-        self.known_paths = [
-            # From very specific to generic. Local installs win,
-            # and /opt/modelname wins over system installs.
-            '.',
-            '~/local/lib',
-            '~/.local/lib',
-            '/opt/{}/lib'.format(self.engine),
-            '/usr/local/lib',
-            '/usr/lib',
-        ]
+        self.known_paths.append('/opt/{}/lib'.format(self.engine))
+        self.library = self._load_library()
 
     def _libname(self):
         """Return platform-specific modelf90 shared library name."""
@@ -238,32 +297,6 @@ class BMIWrapper(object):
         logger.info("Loading library from path {}".format(path))
         return cdll.LoadLibrary(path)
 
-    @staticmethod
-    def wrap(func):
-        """Return wrapped function with type conversion and sanity checks.
-        """
-        @functools.wraps(func, assigned=('restype', 'argtypes'))
-        def wrapped(*args):
-            if len(args) != len(func.argtypes):
-                logger.warn("{} {} not of same length",
-                            args, func.argtypes)
-
-            typed_args = []
-            for (arg, argtype) in zip(args, func.argtypes):
-                if isinstance(argtype._type_, str):
-                    # create a string buffer for strings
-                    typed_arg = create_string_buffer(arg)
-                else:
-                    # for other types, use the type to do the conversion
-                    typed_arg = argtype(argtype._type_(arg))
-                typed_args.append(typed_arg)
-            result = func(*typed_args)
-            if hasattr(result, 'contents'):
-                return result.contents
-            else:
-                return result
-            return wrapped
-        return wrapped
 
     def initialize(self):
         """Initialize and load the Fortran library (and model, if applicable).
@@ -276,7 +309,6 @@ class BMIWrapper(object):
         :meth:`_load_model` changes the working directory to that of the model.
 
         """
-        self.library = self._load_library()
         os.chdir(os.path.dirname(self.configfile) or '.')
         logmsg = "Loading model {} in directory {}".format(
             self.configfile,
@@ -286,7 +318,7 @@ class BMIWrapper(object):
         # Fortran init function.
         self.library.initialize.argtypes = [c_char_p]
         self.library.initialize.restype = c_int
-        ierr = self.wrap(self.library.initialize)(self.configfile)
+        ierr = wrap(self.library.initialize)(self.configfile)
         if ierr:
             errormsg = "Loading model {config} failed with exit code {code}"
             raise RuntimeError(errormsg.format(config=self.configfile, code=ierr))
@@ -299,12 +331,11 @@ class BMIWrapper(object):
         changed back to the original one.
 
         """
-        logger.info('finalize...')
         self.library.finalize.argtypes = []
         self.library.finalize.restype = c_int
-        ierr = self.wrap(self.library.finalize)()
+        ierr = wrap(self.library.finalize)()
         # always go back to previous directory
-        logger.info('cd -')
+        logger.info('cd {}'.format(self.original_dir))
         # This one doesn't work.
         os.chdir(self.original_dir)
         if ierr:
@@ -317,7 +348,7 @@ class BMIWrapper(object):
         """
         self.library.update.argtypes = [POINTER(c_double)]
         self.library.update.restype = c_int
-        result = self.wrap(self.library.update)(dt)
+        result = wrap(self.library.update)(dt)
         return result
 
 
@@ -576,6 +607,18 @@ class BMIWrapper(object):
         c_field = create_string_buffer(field)
         # Pass the void_p by reference...
         set_structure_field(c_name, c_id, c_field, byref(c_value))
+
+    # extensions
+    def set_logger(self, logger):
+        """subscribe to fortran log messages"""
+
+
+        # we don't expect anything back
+        self.library.set_logger.restype = None
+        # as an argument we need a pointer to a fortran log func...
+        self.library.set_logger.argtypes = [
+            POINTER(fortran_log_functype)]
+        self.library.set_logger(byref(fortran_log_func))
 
     def __enter__(self):
         """Return the decorated instance upon entering the ``with`` block.

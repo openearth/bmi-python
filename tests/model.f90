@@ -1,6 +1,8 @@
 module demo_model
   use iso_c_binding
+
   use iso_c_utils
+  use logging
 
   implicit none
 
@@ -21,7 +23,7 @@ contains
   integer(c_int) function finalize() result(ierr) bind(C, name="finalize")
     !DEC$ ATTRIBUTES DLLEXPORT::finalize
     ierr = 0
-    write(*,*) 'Finalize'
+    call log(LEVEL_INFO, 'Finalize')
   end function finalize
 
 
@@ -39,7 +41,9 @@ contains
     t = 0.0d0
     t_end = 10.0d0
     configfile = char_array_to_string(c_configfile)
-    write(*,*) 'Initializing with ', configfile
+
+    write(msgbuf,*) 'Initializing with ', configfile
+    call log(LEVEL_INFO, trim(msgbuf))
 
   end function initialize
 
@@ -53,7 +57,8 @@ contains
 
 
     ierr = 0
-    write(*,*) 'Updating with dt: ', dt
+    write(msgbuf,*) 'Updating with dt: ', dt
+    call log(LEVEL_DEBUG, trim(msgbuf))
     if (dt .eq. -1) then
        t = t + 1.0d0
     else

@@ -1,15 +1,19 @@
+import logging
+import unittest
+
 import nose
 import mock
-import unittest
+
 import bmi.wrapper
+bmi.wrapper.BMIWrapper.known_paths += ['tests']
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 class TestCase(unittest.TestCase):
     def setUp(self):
         self.wrapper = bmi.wrapper.BMIWrapper(engine="model",
                                               configfile="model.ini")
-        # find the model in this directory
-        self.wrapper.known_paths += ['tests']
 
     @mock.patch('platform.system', lambda: 'Linux')
     def test_libname1(self):
@@ -63,6 +67,17 @@ class TestCase(unittest.TestCase):
             self.assertEqual(1, model.get_current_time())
             model.update(5)
             self.assertEqual(6, model.get_current_time())
+
+    def test_set_logger(self):
+        self.wrapper = bmi.wrapper.BMIWrapper(engine="model",
+                                              configfile="model.ini")
+        # find the model in this directory
+        logger = logging.getLogger('test')
+        self.wrapper.set_logger(logger)
+        with self.wrapper as model:
+            self.assertEqual(0, model.get_current_time())
+            model.update()
+
 
 if __name__ == '__main__':
     nose.main()
