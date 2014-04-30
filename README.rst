@@ -92,9 +92,9 @@ use the library as you want.
 Convenience scripts
 -------------------
 
-The python subgrid library contains some scripts that can be used to update input files::
+The python bmi library contains a script that can be used as a command line runner for your model::
 
-  bmi-runner
+  bmi-runner <engine> <configfile>
 
 Links
 --------
