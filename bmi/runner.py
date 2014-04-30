@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-
 """
 Run a BMI model
 
 Usage:
-
     bmi-runner <engine> <file>
 
 Positional arguments:
@@ -14,7 +12,7 @@ Positional arguments:
 Options:
     -h, --help  show this help message and exit
 """
-import docopts
+import docopt
 import logging
 
 from .wrapper import BMIWrapper
@@ -23,6 +21,7 @@ from . import __version__
 
 # do colorlogs here
 def colorlogs():
+    """Append a rainbow logging handler and a formatter to the root logger"""
     try:
         from rainbow_logging_handler import RainbowLoggingHandler
         import sys
@@ -41,13 +40,11 @@ def colorlogs():
 
 
 def main():
-    """main program"""
-
-    arguments = docopts(__doc__, version=__version__)
+    """main bmi runner program"""
+    arguments = docopt.docopt(__doc__, version=__version__)
     colorlogs()
-    arguments =
     # Read input file file
-    wrapper = BMIWrapper(engine=arguments.engine, configfile=arguments.file)
+    wrapper = BMIWrapper(engine=arguments['<engine>'], configfile=arguments['<file>'])
     logging.root.setLevel(logging.DEBUG)
     wrapper.set_logger(logging.root)
     with wrapper as model:
