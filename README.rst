@@ -8,6 +8,7 @@ The BMI_ describes a low level interface for numerical models.
 Origin
 ------
 This module is based on code from:
+
 - CSMDS: https://csdms.colorado.edu/svn/bmi/trunk/python/bmi/BMI.py
 - OpenEarth: http://svn.oss.deltares.nl/repos/openearthtools/trunk/python/OpenEarthTools
 - 3Di: https://github.com/nens/python-subgrid
@@ -15,13 +16,14 @@ This module is based on code from:
 Models
 ------
 Several models implement the BMI_ interface.
+
 - Subgrid: https://github.com/nens/python-subgrid
 - Swan: https://github.com/SiggyF/chenopis
 - XBeach: http://svn.oss.deltares.nl/repos/xbeach
 - DFlow-FM: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/python/dflowfm
 
 Prerequisites
------
+-------------
 
 We need a compiled BMI library (dll, so, dylib). There are a couple of common
 locations where we look for it.::
@@ -70,14 +72,14 @@ Usage
 There are two ways to use the wrapper. A handy way is as a context
 manager, so with a ``with`` statement::
 
-    with BMIWrapper(mdu='/full/path/model.ini') as model:
+    with BMIWrapper(engine="model", configfile='/full/path/model.ini') as model:
         # model is the actual library.
         model.something()
 
 The second way is by calling :meth:`start` and :meth:`stop` yourself and
 using the :attr:`library` attribute to access the Fortran library::
 
-    wrapper = BMIWrapper(mdu='/full/path/model.mdu')
+    wrapper = BMIWrapper(engine="model", configfile='/full/path/model.mdu')
     wrapper.start()
     wrapper.library.something()
     ...

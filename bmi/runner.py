@@ -1,12 +1,24 @@
 #!/usr/bin/env python
 
 """
-Run subgrid as a python script with colored output
+Run a BMI model
+
+Usage:
+
+    bmi-runner <engine> <file>
+
+Positional arguments:
+    engine      model engine
+    file        input file
+
+Options:
+    -h, --help  show this help message and exit
 """
-import argparse
+import docopts
 import logging
 
 from .wrapper import BMIWrapper
+from . import __version__
 
 
 # do colorlogs here
@@ -28,22 +40,12 @@ def colorlogs():
         pass
 
 
-def parse_args():
-    """
-    Parse the command line arguments
-    """
-    argumentparser = argparse.ArgumentParser(
-        description='Run a BMI model')
-    argumentparser.add_argument('engine', help='model engine')
-    argumentparser.add_argument('file', help='input file')
-    arguments = argumentparser.parse_args()
-    return arguments
-
-
-def runner():
+def main():
     """main program"""
+
+    arguments = docopts(__doc__, version=__version__)
     colorlogs()
-    arguments = parse_args()
+    arguments =
     # Read input file file
     wrapper = BMIWrapper(engine=arguments.engine, configfile=arguments.file)
     logging.root.setLevel(logging.DEBUG)
@@ -54,3 +56,6 @@ def runner():
         while t < t_end:
             t = model.get_current_time()
             model.update(-1)
+
+if __name__ == '__main__':
+    main()

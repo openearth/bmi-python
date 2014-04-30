@@ -6,10 +6,26 @@
 Welcome to Basic Model Interface's documentation!
 =================================================
 
+.. include:: ../README.rst
+
 Contents:
 
 .. toctree::
    :maxdepth: 2
+
+
+bmi package
+===========
+
+
+bmi.wrapper module
+------------------
+
+.. automodule:: bmi.wrapper
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 
 

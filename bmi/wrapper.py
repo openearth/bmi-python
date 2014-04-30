@@ -166,9 +166,6 @@ def wrap(func):
     return wrapped
 
 
-
-
-
 SHAPEARRAY = ndpointer(dtype='int32',
                        ndim=1,
                        shape=(MAXDIMS,),
@@ -191,14 +188,15 @@ class BMIWrapper(object):
     There are two ways to use the wrapper. A handy way is as a context
     manager, so with a ``with`` statement::
 
-        with BMIWrapper(config='/full/path/model.ini') as model:
+        with BMIWrapper(engine="model", configfile='/full/path/model.ini') as model:
             # model is the wrapper around library.
             model.update(1.0)
+            ...
 
     The second way is by calling :meth:`start` and :meth:`stop` yourself and
     using the :attr:`library` attribute to access the Fortran library::
 
-        wrapper = BMIWrapper(config='/full/path/model.ini')
+        wrapper = BMIWrapper(engine="model", configfile='/full/path/model.ini')
         wrapper.initalize()
         wrapper.update(1.0)
         ...

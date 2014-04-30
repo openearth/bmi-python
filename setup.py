@@ -59,7 +59,7 @@ setup(
     extras_require={'test': tests_require},
     test_suite='nose.collector',
     entry_points={'console_scripts': [
-            '{0} = bmi.tools:runner'.format(
+            '{0} = bmi.runner:main'.format(
                 'bmi-runnner')
     ]}
 )
