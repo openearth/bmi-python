@@ -44,7 +44,7 @@ def main():
     arguments = docopt.docopt(__doc__, version=__version__)
     colorlogs()
     # Read input file file
-    wrapper = BMIWrapper(engine=arguments['<engine>'], configfile=arguments['<file>'])
+    wrapper = BMIWrapper(engine=arguments['<engine>'], configfile=arguments['<config>'])
     logging.root.setLevel(logging.DEBUG)
     wrapper.set_logger(logging.root)
     with wrapper as model:
