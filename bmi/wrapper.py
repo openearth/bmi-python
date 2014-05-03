@@ -261,6 +261,11 @@ class BMIWrapper(object):
         information is raised.
         """
 
+        # engine is an existing library name
+        # TODO change add directory to library path
+        if os.path.exists(self.engine):
+            return self.engine
+
         pathname = 'LD_LIBRARY_PATH'
         separator = ':'
         if platform.system() == 'Darwin':
@@ -615,8 +620,8 @@ class BMIWrapper(object):
         self.library.set_logger.restype = None
         # as an argument we need a pointer to a fortran log func...
         self.library.set_logger.argtypes = [
-            POINTER(fortran_log_functype)]
-        self.library.set_logger(byref(fortran_log_func))
+            (fortran_log_functype)]
+        self.library.set_logger((fortran_log_func))
 
     def __enter__(self):
         """Return the decorated instance upon entering the ``with`` block.

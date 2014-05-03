@@ -61,6 +61,6 @@ setup(
     test_suite='nose.collector',
     entry_points={'console_scripts': [
             '{0} = bmi.runner:main'.format(
-                'bmi-runnner')
+                'bmi-runner')
     ]}
 )
