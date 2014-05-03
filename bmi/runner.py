@@ -3,11 +3,11 @@
 Run a BMI model
 
 Usage:
-    bmi-runner <engine> <file>
+    bmi-runner <engine> <config>
 
 Positional arguments:
-    engine      model engine
-    file        input file
+    engine      model engine name, this is either name of the library (e.g. model1) or full path to the BMI library (/usr/lib/libmodel1.so.5 or C:\opt\model1.dll)
+    config      model config file, used to initialize model
 
 Options:
     -h, --help  show this help message and exit
@@ -44,7 +44,7 @@ def main():
     arguments = docopt.docopt(__doc__, version=__version__)
     colorlogs()
     # Read input file file
-    wrapper = BMIWrapper(engine=arguments['<engine>'], configfile=arguments['<file>'])
+    wrapper = BMIWrapper(engine=arguments['<engine>'], configfile=arguments['<config>'])
     logging.root.setLevel(logging.DEBUG)
     wrapper.set_logger(logging.root)
     with wrapper as model:
