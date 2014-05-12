@@ -75,8 +75,7 @@ LEVELS_F2PY[6] = logging.FATAL
 
 # We need this defined global, otherwise we get a segfault
 def fortran_log(level_p, message):
-    return
-    """pytho logger to be called from fortran"""
+    """python logger to be called from fortran"""
     f_level = level_p.contents.value
     level = LEVELS_F2PY[f_level]
     logger.log(level, message)
