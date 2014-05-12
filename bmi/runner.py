@@ -3,7 +3,8 @@
 Run a BMI model
 
 Usage:
-    bmi-runner <engine> <config>
+    bmi-runner <engine> <config> [--no-logger]
+    bmi-runner -h | --help
 
 Positional arguments:
     engine      model engine name, this is either name of the library (e.g. model1) or full path to the BMI library (/usr/lib/libmodel1.so.5 or C:\opt\model1.dll)
@@ -11,6 +12,7 @@ Positional arguments:
 
 Options:
     -h, --help  show this help message and exit
+    -n, --no-logger  do not inject logger into BMI library
 """
 import docopt
 import logging
@@ -44,12 +46,12 @@ def main():
     arguments = docopt.docopt(__doc__, version=__version__)
     colorlogs()
     # Read input file file
-    wrapper = BMIWrapper(engine=arguments['<engine>'], configfile=arguments['<config>'])
+    wrapper = BMIWrapper(engine=arguments['<engine>'], configfile=arguments['<config>'], no_logger=arguments['--no-logger'])
     logging.root.setLevel(logging.DEBUG)
     wrapper.set_logger(logging.root)
     with wrapper as model:
         t_end = model.get_end_time()
-        t = 0
+        t = model.get_start_time()
         while t < t_end:
             t = model.get_current_time()
             model.update(-1)

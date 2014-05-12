@@ -13,7 +13,8 @@ install_requires = [
     'numpy',
     'pandas',
     'psutil',
-    'docopts'
+    'docopts',
+    'rainbow_logging_handler'
     ]
 
 if sys.version_info[0] < 3:
