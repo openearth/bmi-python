@@ -301,7 +301,6 @@ class BMIWrapper(object):
         logger.info("Loading library from path {}".format(path))
         return cdll.LoadLibrary(path)
 
-                     
     def initialize(self):
         """Initialize and load the Fortran library (and model, if applicable).
 
