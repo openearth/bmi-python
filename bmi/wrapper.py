@@ -610,18 +610,14 @@ class BMIWrapper(object):
     def set_logger(self, logger):
         """subscribe to fortran log messages"""
 
-
         # we don't expect anything back
         self.library.set_logger.restype = None
         # as an argument we need a pointer to a fortran log func...
         self.library.set_logger.argtypes = [
-            POINTER(fortran_log_functype)]
             (fortran_log_functype)]
-        self.library.set_logger((fortran_log_func))
 
-        print(self.no_logger)
         if not self.no_logger:        
-            self.library.set_logger(byref(fortran_log_func))
+            self.library.set_logger((fortran_log_func))
 
     def __enter__(self):
         """Return the decorated instance upon entering the ``with`` block.
