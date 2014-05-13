@@ -7,12 +7,12 @@ Usage:
     bmi-runner -h | --help
 
 Positional arguments:
-    engine      model engine name, this is either name of the library (e.g. model1) or full path to the BMI library (/usr/lib/libmodel1.so.5 or C:\opt\model1.dll)
+    engine      model engine name, this is either name of the library (e.g. model1) or full path to the BMI library (/usr/lib/libmodel1.so.5 or C:\\opt\\model1.dll)
     config      model config file, used to initialize model
 
 Options:
-    -h, --help  show this help message and exit
-    -l, --disable-logger do not inject logger into the BMI library
+    -h, --help        show this help message and exit
+    --disable-logger  do not inject logger into the BMI library
 """
 import docopt
 import logging

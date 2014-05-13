@@ -222,7 +222,7 @@ class BMIWrapper(object):
         '/usr/lib',
     ]
 
-    def __init__(self, engine, configfile, disable_logger):
+    def __init__(self, engine, configfile):
         """Initialize the class.
 
         The ``engine`` argument should be the path to a model's ``engine``
@@ -327,7 +327,8 @@ class BMIWrapper(object):
         ierr = wrap(self.library.initialize)(self.configfile)
         if ierr:
             errormsg = "Loading model {config} failed with exit code {code}"
-            raise RuntimeError(errormsg.format(config=self.configfile, code=ierr))wrap(self.library.initialize)(self.configfile)
+            raise RuntimeError(errormsg.format(config=self.configfile,
+                                               code=ierr))
 
     def finalize(self):
         """Shutdown the library and clean up the model.
