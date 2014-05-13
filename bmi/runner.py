@@ -14,8 +14,9 @@ Options:
     -h, --help        show this help message and exit
     --disable-logger  do not inject logger into the BMI library
 """
-import docopt
 import logging
+
+import docopt
 
 from .wrapper import BMIWrapper
 from . import __version__
@@ -30,8 +31,8 @@ def colorlogs():
         # setup `RainbowLoggingHandler`
         logger = logging.root
         # same as default
-        format = "[%(asctime)s] %(name)s %(funcName)s():%(lineno)d\t%(message)s [%(levelname)s]"
-        formatter = logging.Formatter(format)
+        fmt = "[%(asctime)s] %(name)s %(funcName)s():%(lineno)d\t%(message)s [%(levelname)s]"
+        formatter = logging.Formatter(fmt)
         handler = RainbowLoggingHandler(sys.stderr,
                                         color_funcName=('black', 'gray', True))
         handler.setFormatter(formatter)
@@ -60,6 +61,7 @@ def main():
         while t < t_end:
             t = model.get_current_time()
             model.update(-1)
+
 
 if __name__ == '__main__':
     main()
