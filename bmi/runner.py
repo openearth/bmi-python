@@ -3,7 +3,7 @@
 Run a BMI model
 
 Usage:
-    bmi-runner <engine> <config> [--disable-logger]
+    bmi-runner <engine> [<config>] [--disable-logger]
     bmi-runner -h | --help
 
 Positional arguments:
@@ -46,9 +46,14 @@ def main():
     arguments = docopt.docopt(__doc__, version=__version__)
     colorlogs()
     # Read input file file
-    wrapper = BMIWrapper(engine=arguments['<engine>'], configfile=arguments['<config>'], disable_logger=arguments['--disable-logger'])
-    logging.root.setLevel(logging.DEBUG)
-    wrapper.set_logger(logging.root)
+    wrapper = BMIWrapper(
+        engine=arguments['<engine>'],
+        configfile=arguments['<config>'] or ''
+    )
+    # add logger if required
+    if not arguments['--disable-logger']:
+        logging.root.setLevel(logging.DEBUG)
+        wrapper.set_logger(logging.root)
     with wrapper as model:
         t_end = model.get_end_time()
         t = model.get_start_time()

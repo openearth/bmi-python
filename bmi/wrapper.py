@@ -42,7 +42,7 @@ def create_string_buffer(init, size=None):
     # a create_string_buffer that works...
     if isinstance(init, (str, bytes)):
         if size is None:
-            size = len(init)+1
+            size = len(init) + 1
         buftype = c_char * size
         buf = buftype()
         if isinstance(init, bytes):
@@ -72,17 +72,16 @@ LEVELS_F2PY[6] = logging.FATAL
 # level OFF
 
 
-
 # We need this defined global, otherwise we get a segfault
-def fortran_log(level_p, message):
+def c_log(level, message):
     """python logger to be called from fortran"""
-    f_level = level_p.contents.value
-    level = LEVELS_F2PY[f_level]
+    c_level = level
+    level = LEVELS_F2PY[c_level]
     logger.log(level, message)
 
 # define the type of the fortran function
-fortran_log_functype = CFUNCTYPE(None, POINTER(c_int), c_char_p)
-fortran_log_func = fortran_log_functype(fortran_log)
+fortran_log_functype = CFUNCTYPE(None, c_int, c_char_p)
+fortran_log_func = fortran_log_functype(c_log)
 
 # maximum rank
 MAXDIMS = 6
@@ -150,12 +149,16 @@ def wrap(func):
 
         typed_args = []
         for (arg, argtype) in zip(args, func.argtypes):
-            if isinstance(argtype._type_, str):
+            if argtype == c_char_p:
                 # create a string buffer for strings
                 typed_arg = create_string_buffer(arg)
             else:
                 # for other types, use the type to do the conversion
-                typed_arg = argtype(argtype._type_(arg))
+                if hasattr(argtype, 'contents'):
+                    # type is a pointer
+                    typed_arg = argtype(argtype._type_(arg))
+                else:
+                    typed_arg = argtype(arg)
             typed_args.append(typed_arg)
         result = func(*typed_args)
         if hasattr(result, 'contents'):
@@ -183,6 +186,7 @@ except AttributeError:
 
 
 class BMIWrapper(object):
+
     """Wrapper around a ctypes-loaded BMI library.
 
     There are two ways to use the wrapper. A handy way is as a context
@@ -218,7 +222,6 @@ class BMIWrapper(object):
         '/usr/lib',
     ]
 
-
     def __init__(self, engine, configfile, disable_logger):
         """Initialize the class.
 
@@ -233,7 +236,6 @@ class BMIWrapper(object):
         """
         self.engine = engine
         self.configfile = configfile
-        self.disable_logger = disable_logger
         self.original_dir = os.getcwd()
 
         self.known_paths.append('/opt/{}/lib'.format(self.engine))
@@ -264,7 +266,7 @@ class BMIWrapper(object):
 
         # engine is an existing library name
         # TODO change add directory to library path
-        if os.path.exists(self.engine):
+        if os.path.isfile(self.engine):
             return self.engine
 
         pathname = 'LD_LIBRARY_PATH'
@@ -280,7 +282,8 @@ class BMIWrapper(object):
         lib_path_from_environment = os.environ.get(pathname, '')
         # Expand the paths with the system path if it exists
         if lib_path_from_environment:
-            known_paths = [path for path in lib_path_from_environment.split(separator)]  + self.known_paths
+            known_paths = [
+                path for path in lib_path_from_environment.split(separator)] + self.known_paths
         else:
             known_paths = self.known_paths
         # expand ~
@@ -320,7 +323,7 @@ class BMIWrapper(object):
         logger.info(logmsg)
         # Fortran init function.
         self.library.initialize.argtypes = [c_char_p]
-        self.library.initialize.restype = c_int
+        self.library.initialize.restype = None
         ierr = wrap(self.library.initialize)(self.configfile)
         if ierr:
             errormsg = "Loading model {config} failed with exit code {code}"
@@ -349,11 +352,10 @@ class BMIWrapper(object):
         """
         Return type string, compatible with numpy.
         """
-        self.library.update.argtypes = [POINTER(c_double)]
+        self.library.update.argtypes = [c_double]
         self.library.update.restype = c_int
         result = wrap(self.library.update)(dt)
         return result
-
 
     # Variable Information Functions
     # Note that these call subroutines.
@@ -386,7 +388,7 @@ class BMIWrapper(object):
         Lookup the type,rank and shape of a compound field
         """
         typename = create_string_buffer(name)
-        index = c_int(index+1)
+        index = c_int(index + 1)
         fieldname = create_string_buffer(MAXSTRLEN)
         fieldtype = create_string_buffer(MAXSTRLEN)
         rank = c_int()
@@ -429,7 +431,7 @@ class BMIWrapper(object):
             assert fieldrank <= 1
             fieldctype = CTYPESMAP[fieldtype]
             if fieldrank == 1:
-                fieldctype = fieldctype*fieldshape[0]
+                fieldctype = fieldctype * fieldshape[0]
             fields.append((fieldname, fieldctype))
         # create a new structure
 
@@ -502,7 +504,6 @@ class BMIWrapper(object):
         self.library.get_current_time.restype = None
         self.library.get_current_time(byref(current_time))
         return current_time.value
-
 
     # Change sliced to True, once we have a complete list of slices...
     def get_nd(self, name, sliced=False):
@@ -589,7 +590,7 @@ class BMIWrapper(object):
             assert fieldrank <= 1
             fieldctype = CTYPESMAP[fieldtype]
             if fieldrank == 1:
-                fieldctype = fieldctype*fieldshape[0]
+                fieldctype = fieldctype * fieldshape[0]
             fields[fieldname] = fieldctype
 
         T = fields[field]       # type (c_double)
@@ -615,17 +616,13 @@ class BMIWrapper(object):
     def set_logger(self, logger):
         """subscribe to fortran log messages"""
 
-
         # we don't expect anything back
         self.library.set_logger.restype = None
         # as an argument we need a pointer to a fortran log func...
         self.library.set_logger.argtypes = [
             (fortran_log_functype)]
 
-        if self.disable_logger:
-           return
-        
-        self.library.set_logger((fortran_log_func))
+        self.library.set_logger(fortran_log_func)
 
     def __enter__(self):
         """Return the decorated instance upon entering the ``with`` block.
