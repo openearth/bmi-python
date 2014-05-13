@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 from ctypes import (
     # Types
-    c_double, c_int, c_char_p, c_bool, c_char, c_float, c_void_p,
+    c_double, c_int, c_char_p, c_bool, c_char, c_float,
     # Complex types
     ARRAY, Structure,
     # Making strings
@@ -165,7 +165,6 @@ def wrap(func):
             return result.contents
         else:
             return result
-        return wrapped
     return wrapped
 
 
@@ -453,7 +452,7 @@ class BMIWrapper(object):
     def get_var_rank(self, name):
         """
         Return array rank or 0 for scalar.
-        """,
+        """
         name = create_string_buffer(name)
         rank = c_int()
         self.library.get_var_rank.argtypes = [c_char_p, POINTER(c_int)]

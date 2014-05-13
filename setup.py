@@ -1,12 +1,13 @@
 from setuptools import setup, find_packages
 import sys
+
 version = '0.1'
 
 long_description = '\n\n'.join([
     open('README.rst').read(),
     open('CREDITS.rst').read(),
     open('CHANGES.rst').read(),
-    ])
+])
 
 install_requires = [
     'setuptools',
@@ -14,18 +15,18 @@ install_requires = [
     'pandas',
     'psutil',
     'docopts',
-    'rainbow_logging_handler'
-    ]
+    'rainbow_logging_handler',
+    'faulthandler'
+]
 
 if sys.version_info[0] < 3:
     install_requires.append('faulthandler')
-
 
 tests_require = [
     'nose',
     'mock',
     'coverage'
-    ]
+]
 
 setup(
     name='bmi',
@@ -61,7 +62,7 @@ setup(
     extras_require={'test': tests_require},
     test_suite='nose.collector',
     entry_points={'console_scripts': [
-            '{0} = bmi.runner:main'.format(
-                'bmi-runner')
+        '{0} = bmi.runner:main'.format(
+            'bmi-runner')
     ]}
 )
