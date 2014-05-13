@@ -75,8 +75,7 @@ LEVELS_F2PY[6] = logging.FATAL
 
 # We need this defined global, otherwise we get a segfault
 def fortran_log(level_p, message):
-    return
-    """pytho logger to be called from fortran"""
+    """python logger to be called from fortran"""
     f_level = level_p.contents.value
     level = LEVELS_F2PY[f_level]
     logger.log(level, message)
@@ -220,7 +219,7 @@ class BMIWrapper(object):
     ]
 
 
-    def __init__(self, engine, configfile, no_logger):
+    def __init__(self, engine, configfile, disable_logger):
         """Initialize the class.
 
         The ``engine`` argument should be the path to a model's ``engine``
@@ -234,7 +233,7 @@ class BMIWrapper(object):
         """
         self.engine = engine
         self.configfile = configfile
-        self.no_logger = no_logger
+        self.disable_logger = disable_logger
         self.original_dir = os.getcwd()
 
         self.known_paths.append('/opt/{}/lib'.format(self.engine))
@@ -302,7 +301,6 @@ class BMIWrapper(object):
         logger.info("Loading library from path {}".format(path))
         return cdll.LoadLibrary(path)
 
-                     
     def initialize(self):
         """Initialize and load the Fortran library (and model, if applicable).
 
@@ -323,7 +321,10 @@ class BMIWrapper(object):
         # Fortran init function.
         self.library.initialize.argtypes = [c_char_p]
         self.library.initialize.restype = c_int
-        wrap(self.library.initialize)(self.configfile)
+        ierr = wrap(self.library.initialize)(self.configfile)
+        if ierr:
+            errormsg = "Loading model {config} failed with exit code {code}"
+            raise RuntimeError(errormsg.format(config=self.configfile, code=ierr))wrap(self.library.initialize)(self.configfile)
 
     def finalize(self):
         """Shutdown the library and clean up the model.
@@ -335,11 +336,14 @@ class BMIWrapper(object):
         """
         self.library.finalize.argtypes = []
         self.library.finalize.restype = c_int
-        wrap(self.library.finalize)()
+        ierr = wrap(self.library.finalize)()
         # always go back to previous directory
         logger.info('cd {}'.format(self.original_dir))
         # This one doesn't work.
         os.chdir(self.original_dir)
+        if ierr:
+            errormsg = "Finalizing model {engine} failed with exit code {code}"
+            raise RuntimeError(errormsg.format(engine=self.engine, code=ierr))
 
     def update(self, dt=-1):
         """
@@ -616,11 +620,12 @@ class BMIWrapper(object):
         self.library.set_logger.restype = None
         # as an argument we need a pointer to a fortran log func...
         self.library.set_logger.argtypes = [
-            POINTER(fortran_log_functype)]
+            (fortran_log_functype)]
 
-        print(self.no_logger)
-        if not self.no_logger:        
-            self.library.set_logger(byref(fortran_log_func))
+        if self.disable_logger:
+           return
+        
+        self.library.set_logger((fortran_log_func))
 
     def __enter__(self):
         """Return the decorated instance upon entering the ``with`` block.
