@@ -17,13 +17,22 @@ Contents:
 bmi package
 ===========
 
+bmi wrapper
+===========
 
-bmi.wrapper module
-------------------
-.. module:: bmi.wrapper
-.. autoclass:: BMIWrapper
-   :inherited-members:
+.. automodule:: bmi.wrapper
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
+
+wrapper
+=======
+
+.. automodule:: bmi.runner
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 
 Indices and tables
