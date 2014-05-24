@@ -1,4 +1,3 @@
--e git+https://github.com/openearth/bmi-python.git@a834c8ecfbc4b87c000a13181838754a42e8f895#egg=bmi-master
 colorama==0.3.1
 docopt==0.6.1
 docopts==0.6.1
