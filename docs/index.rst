@@ -20,12 +20,9 @@ bmi package
 
 bmi.wrapper module
 ------------------
-
-.. automodule:: bmi.wrapper
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+.. module:: bmi.wrapper
+.. autoclass:: BMIWrapper
+   :inherited-members:
 
 
 
