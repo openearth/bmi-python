@@ -1,0 +1,14 @@
+-e git+https://github.com/openearth/bmi-python.git@a834c8ecfbc4b87c000a13181838754a42e8f895#egg=bmi-master
+colorama==0.3.1
+docopt==0.6.1
+docopts==0.6.1
+faulthandler==2.3
+logutils==0.3.3
+numpy==1.8.1
+pandas==0.13.1
+psutil==2.1.1
+python-dateutil==2.2
+pytz==2014.3
+rainbow-logging-handler==2.2.0
+six==1.6.1
+wsgiref==0.1.2
