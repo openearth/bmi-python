@@ -362,6 +362,25 @@ class BMIWrapper(object):
     # In python you expect a function to return something
     # In fortran subroutines can also return something in the input arguments
     # That's why we wrap these manually, we return the input arguments
+    def get_var_count(self):
+        """
+        Return number of variables
+        """
+        n = c_int()
+        self.library.get_var_count.argtypes = [POINTER(c_int)]
+        self.library.get_var_count(byref(n))
+        return n.value
+
+    def get_var_name(self, i):
+        """
+        Return variable name
+        """
+        i = c_int(i)
+        name = create_string_buffer(MAXSTRLEN)
+        self.library.get_var_name.argtypes = [c_int, c_char_p]
+        self.library.get_var_name(i, name)
+        return name.value
+
     def get_var_type(self, name):
         """
         Return type string, compatible with numpy.
@@ -543,29 +562,11 @@ class BMIWrapper(object):
             return None
 
         if is_numpytype:
-            # array can be shared memory (always a copy)
-            if self.sharedmem:
-                shared_arr = multiprocessing.Array(
-                    CTYPESMAP[TYPEMAP[type_]],
-                    np.prod(shape), lock=True
-                )
-                array = np.frombuffer(shared_arr.get_obj())
-                array[:] = np.array(data)
-            # or a copy, if needed
-            else:
-                if name in NEED_COPYING:
-                    logger.debug("copying %s, memory will be reallocated",
-                                 name)
-                    array = np.array(data).copy()
-            # or just a pointer
-                else:
-                    array = np.ctypeslib.as_array(data)
+            # for now always a pointer, see python-subgrid for advanced examples
+            array = np.ctypeslib.as_array(data)
         else:
             array = structs2pandas(data.contents)
 
-        if name in SLICES and sliced:
-            # return slice if needed
-            array = array[SLICES[name]]
         return array
 
     def set_structure_field(self, name, id, field, value):

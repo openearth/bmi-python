@@ -3,7 +3,7 @@
 Run a BMI model
 
 Usage:
-    bmi-runner <engine> [<config>] [--disable-logger]
+    bmi-runner <engine> [<config>] [--disable-logger] [--list]
     bmi-runner -h | --help
 
 Positional arguments:
@@ -13,6 +13,7 @@ Positional arguments:
 Options:
     -h, --help        show this help message and exit
     --disable-logger  do not inject logger into the BMI library
+    --list            list available variables
 """
 import logging
 
@@ -23,7 +24,7 @@ from . import __version__
 
 
 # do colorlogs here
-def colorlogs():
+def colorlogs(format="short"):
     """Append a rainbow logging handler and a formatter to the root logger"""
     try:
         from rainbow_logging_handler import RainbowLoggingHandler
@@ -31,7 +32,10 @@ def colorlogs():
         # setup `RainbowLoggingHandler`
         logger = logging.root
         # same as default
-        fmt = "[%(asctime)s] %(name)s %(funcName)s():%(lineno)d\t%(message)s [%(levelname)s]"
+        if format == "short":
+            fmt = "%(message)s "
+        else:
+            fmt = "[%(asctime)s] %(name)s %(funcName)s():%(lineno)d\t%(message)s [%(levelname)s]"
         formatter = logging.Formatter(fmt)
         handler = RainbowLoggingHandler(sys.stderr,
                                         color_funcName=('black', 'gray', True))
@@ -56,6 +60,14 @@ def main():
         logging.root.setLevel(logging.DEBUG)
         wrapper.set_logger(logging.root)
     with wrapper as model:
+        if arguments['--list']:
+            n = model.get_var_count()
+            logging.info("n: %s", n)
+            for i in range(n):
+                name = model.get_var_name(i)
+                logging.info(name)
+                var = model.get_nd(name)
+                logging.debug(var)
         t_end = model.get_end_time()
         t = model.get_start_time()
         while t < t_end:
