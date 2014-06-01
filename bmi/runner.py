@@ -3,7 +3,7 @@
 Run a BMI model
 
 Usage:
-    bmi-runner <engine> [<config>] [--disable-logger] [--list]
+    bmi-runner <engine> [<config>] [--disable-logger] [--info]
     bmi-runner -h | --help
 
 Positional arguments:
@@ -13,7 +13,7 @@ Positional arguments:
 Options:
     -h, --help        show this help message and exit
     --disable-logger  do not inject logger into the BMI library
-    --list            list available variables
+    --info            display information about the model
 """
 import logging
 
@@ -45,6 +45,18 @@ def colorlogs(format="short"):
         # rainbow logger not found, that's ok
         pass
 
+def info(model):
+    n = model.get_var_count()
+    logging.info("variables (%s):", n)
+    for i in range(n):
+        name = model.get_var_name(i)
+        rank = model.get_var_rank(name)
+        type = model.get_var_type(name)
+        shape = model.get_var_shape(name)
+        vartxt = "%s" % (model.get_var(name), )
+        msg = "{name} ({rank}D, {shape}, {type}):\n{vartxt}"
+        logging.debug(msg.format(**locals()))
+
 
 def main():
     """main bmi runner program"""
@@ -60,14 +72,8 @@ def main():
         logging.root.setLevel(logging.DEBUG)
         wrapper.set_logger(logging.root)
     with wrapper as model:
-        if arguments['--list']:
-            n = model.get_var_count()
-            logging.info("n: %s", n)
-            for i in range(n):
-                name = model.get_var_name(i)
-                logging.info(name)
-                var = model.get_nd(name)
-                logging.debug(var)
+        if arguments['--info']:
+            info(model)
         t_end = model.get_end_time()
         t = model.get_start_time()
         while t < t_end:

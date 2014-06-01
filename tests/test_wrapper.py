@@ -1,8 +1,10 @@
 import logging
 import unittest
-
 import nose
-import mock
+try:
+    import mock
+except ImportError:
+    pass
 
 import bmi.wrapper
 bmi.wrapper.BMIWrapper.known_paths += ['tests']
@@ -12,20 +14,20 @@ logging.basicConfig(level=logging.DEBUG)
 
 class TestCase(unittest.TestCase):
     def setUp(self):
-        self.wrapper = bmi.wrapper.BMIWrapper(engine="model",
+        self.wrapper = bmi.wrapper.BMIWrapper(engine="modelc",
                                               configfile="model.ini")
 
     @mock.patch('platform.system', lambda: 'Linux')
     def test_libname1(self):
-        self.assertEquals(self.wrapper._libname(), 'libmodel.so')
+        self.assertEquals(self.wrapper._libname(), 'libmodelc.so')
 
     @mock.patch('platform.system', lambda: 'Darwin')
     def test_libname2(self):
-        self.assertEquals(self.wrapper._libname(), 'libmodel.dylib')
+        self.assertEquals(self.wrapper._libname(), 'libmodelc.dylib')
 
     @mock.patch('platform.system', lambda: 'Windows')
     def test_libname3(self):
-        self.assertEquals(self.wrapper._libname(), 'model.dll')
+        self.assertEquals(self.wrapper._libname(), 'modelc.dll')
 
     def test_initialize(self):
         self.wrapper.initialize()
@@ -57,7 +59,7 @@ class TestCase(unittest.TestCase):
     def test_update_time(self):
         with self.wrapper as model:
             self.assertEqual(0, model.get_current_time())
-            model.update()
+            model.update(1.0)
             self.assertEqual(1, model.get_current_time())
 
     def test_update_twice(self):
@@ -68,8 +70,12 @@ class TestCase(unittest.TestCase):
             model.update(5)
             self.assertEqual(6, model.get_current_time())
 
+    def test_get_var(self):
+        with self.wrapper as model:
+            model.get_var('arr1')
+
     def test_set_logger(self):
-        self.wrapper = bmi.wrapper.BMIWrapper(engine="model",
+        self.wrapper = bmi.wrapper.BMIWrapper(engine="modelc",
                                               configfile="model.ini")
         # find the model in this directory
         logger = logging.getLogger('test')

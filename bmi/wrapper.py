@@ -525,7 +525,7 @@ class BMIWrapper(object):
         return current_time.value
 
     # Change sliced to True, once we have a complete list of slices...
-    def get_nd(self, name, sliced=False):
+    def get_var(self, name, sliced=False):
         """Return an nd array from model library"""
         # How many dimensions.
         rank = self.get_var_rank(name)
