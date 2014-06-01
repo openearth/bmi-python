@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 from ctypes import (
     # Types
-    c_double, c_int, c_char_p, c_bool, c_char, c_float,
+    c_double, c_int, c_char_p, c_bool, c_char, c_float, c_void_p,
     # Complex types
     ARRAY, Structure,
     # Making strings
@@ -569,6 +569,13 @@ class BMIWrapper(object):
 
         return array
 
+    def set_var(self, name, var):
+        set_var = self.library.set_var
+        set_var.argtypes = [c_char_p, c_void_p]
+        set_var.restype = None
+        ptr = var.ctypes.data_as(c_void_p)
+        c_name = create_string_buffer(name)
+        set_var(c_name, ptr)
     def set_structure_field(self, name, id, field, value):
         # This only works for 1d
         rank = self.get_var_rank(name)

@@ -1,6 +1,8 @@
 import logging
 import unittest
 import nose
+import numpy.testing as npt
+import numpy as np
 try:
     import mock
 except ImportError:
@@ -72,7 +74,15 @@ class TestCase(unittest.TestCase):
 
     def test_get_var(self):
         with self.wrapper as model:
-            model.get_var('arr1')
+            arr1 = model.get_var('arr1')
+            npt.assert_allclose(arr1, [3,2,1])
+    def test_set_var(self):
+        with self.wrapper as model:
+            arr1 = model.get_var('arr1')
+            zeros = np.zeros_like(arr1)
+            model.set_var('arr1', zeros)
+            arr1a = model.get_var('arr1')
+            npt.assert_allclose(arr1a, zeros)
 
     def test_set_logger(self):
         self.wrapper = bmi.wrapper.BMIWrapper(engine="modelc",
