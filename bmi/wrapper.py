@@ -524,8 +524,7 @@ class BMIWrapper(object):
         self.library.get_current_time(byref(current_time))
         return current_time.value
 
-    # Change sliced to True, once we have a complete list of slices...
-    def get_var(self, name, sliced=False):
+    def get_var(self, name):
         """Return an nd array from model library"""
         # How many dimensions.
         rank = self.get_var_rank(name)
@@ -576,6 +575,19 @@ class BMIWrapper(object):
         ptr = var.ctypes.data_as(c_void_p)
         c_name = create_string_buffer(name)
         set_var(c_name, ptr)
+
+    def set_var_slice(self, name, start, count, var):
+        rank = self.get_var_rank(name)
+        set_var_slice = self.library.set_var_slice
+        set_var_slice.argtypes = [c_char_p, c_int*rank, c_int*rank, c_void_p]
+        set_var_slice.restype = None
+        ptr = var.ctypes.data_as(c_void_p)
+        c_name = create_string_buffer(name)
+        c_start = (c_int*rank)(*start)
+        c_count = (c_int*rank)(*count)
+        set_var_slice(c_name, c_start, c_count, ptr)
+
+
     def set_structure_field(self, name, id, field, value):
         # This only works for 1d
         rank = self.get_var_rank(name)

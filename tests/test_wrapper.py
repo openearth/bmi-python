@@ -12,7 +12,7 @@ import bmi.wrapper
 bmi.wrapper.BMIWrapper.known_paths += ['tests']
 
 logging.basicConfig(level=logging.DEBUG)
-
+logger = logging.getLogger(__name__)
 
 class TestCase(unittest.TestCase):
     def setUp(self):
@@ -78,11 +78,21 @@ class TestCase(unittest.TestCase):
             npt.assert_allclose(arr1, [3,2,1])
     def test_set_var(self):
         with self.wrapper as model:
-            arr1 = model.get_var('arr1')
-            zeros = np.zeros_like(arr1)
-            model.set_var('arr1', zeros)
+            for name in ('arr1', 'arr2', 'arr3'):
+                arr = model.get_var(name)
+                zeros = np.zeros_like(arr)
+                model.set_var(name, zeros)
+                arr_a = model.get_var(name)
+                npt.assert_allclose(arr_a, zeros)
+    def test_set_var_slice(self):
+        with self.wrapper as model:
+            arr1 = model.get_var('arr1').copy()
+            values = np.array([5], dtype=arr1.dtype)
+            model.set_var_slice('arr1', (0,), (1,), values)
             arr1a = model.get_var('arr1')
-            npt.assert_allclose(arr1a, zeros)
+            arr1[0] = 5
+            logger.info(arr1a)
+            npt.assert_allclose(arr1a, arr1)
 
     def test_set_logger(self):
         self.wrapper = bmi.wrapper.BMIWrapper(engine="modelc",
