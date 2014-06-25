@@ -63,10 +63,14 @@ def main():
     arguments = docopt.docopt(__doc__, version=__version__)
     colorlogs()
     # Read input file file
+
+
     wrapper = BMIWrapper(
         engine=arguments['<engine>'],
         configfile=arguments['<config>'] or ''
     )
+
+
     # add logger if required
     if not arguments['--disable-logger']:
         logging.root.setLevel(logging.DEBUG)

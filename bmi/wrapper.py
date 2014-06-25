@@ -301,6 +301,11 @@ class BMIWrapper(object):
         """Return the fortran library, loaded with """
         path = self._library_path()
         logger.info("Loading library from path {}".format(path))
+        library_dir = os.dirname(path)
+        if platform.system() == 'Windows':
+            import win32api
+            win32api.SetDllDirectory(library_dir)
+
         return cdll.LoadLibrary(path)
 
     def initialize(self):
