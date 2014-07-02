@@ -40,7 +40,7 @@ def create_string_buffer(init, size=None):
     create_string_buffer(aString, anInteger) -> character array
     """
     # a create_string_buffer that works...
-    if isinstance(init, (str, bytes)):
+    if isinstance(init, (str, bytes)) or isinstance(init, (unicode, bytes)):
         if size is None:
             size = len(init) + 1
         buftype = c_char * size
@@ -301,12 +301,20 @@ class BMIWrapper(object):
         """Return the fortran library, loaded with """
         path = self._library_path()
         logger.info("Loading library from path {}".format(path))
-        library_dir = os.dirname(path)
+        library_dir = os.path.dirname(path)
         if platform.system() == 'Windows':
             import win32api
-            win32api.SetDllDirectory(library_dir)
+            olddir = os.getcwd()
+            os.chdir(library_dir)
+            win32api.SetDllDirectory('.')
 
-        return cdll.LoadLibrary(path)
+        result = cdll.LoadLibrary(os.path.basename(path))
+
+        if platform.system() == 'Windows':
+            os.chdir(olddir)
+
+        return result
+
 
     def initialize(self):
         """Initialize and load the Fortran library (and model, if applicable).
@@ -328,7 +336,7 @@ class BMIWrapper(object):
         # Fortran init function.
         self.library.initialize.argtypes = [c_char_p]
         self.library.initialize.restype = None
-        ierr = wrap(self.library.initialize)(self.configfile)
+        ierr = wrap(self.library.initialize)(os.path.abspath(self.configfile))
         if ierr:
             errormsg = "Loading model {config} failed with exit code {code}"
             raise RuntimeError(errormsg.format(config=self.configfile,
