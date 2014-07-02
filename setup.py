@@ -15,6 +15,7 @@ install_requires = [
     'pandas',
     'psutil',
     'docopts',
+    'six',
     'rainbow_logging_handler'
 ]
 
