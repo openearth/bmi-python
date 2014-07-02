@@ -12,6 +12,7 @@ import multiprocessing          # for shared memory
 import platform
 import sys
 
+import six
 import faulthandler
 
 from numpy.ctypeslib import ndpointer  # nd arrays
@@ -33,29 +34,28 @@ from ctypes import (
 )
 
 
-# Custom version of create_string_buffer that also accepts py3 strings.
-def create_string_buffer(init, size=None):
-    """create_string_buffer(aBytes) -> character array
+def create_string_buffer(init, size=None, encoding=sys.getdefaultencoding()):
+    """create_string_buffer(aString) -> character array
     create_string_buffer(anInteger) -> character array
     create_string_buffer(aString, anInteger) -> character array
     """
-    # a create_string_buffer that works...
-    if isinstance(init, (str, bytes)) or isinstance(init, (unicode, bytes)):
+    if isinstance(init, six.string_types + (six.binary_type,)):
         if size is None:
             size = len(init) + 1
         buftype = c_char * size
         buf = buftype()
-        if isinstance(init, bytes):
+        try:
+            buf.value = init.encode(encoding)
+        except AttributeError:
             buf.value = init
-        else:
-            # just work....
-            buf.value = init.encode(sys.getdefaultencoding())
+
         return buf
-    elif isinstance(init, int):
+    elif isinstance(init, six.integer_types):
         buftype = c_char * init
         buf = buftype()
         return buf
     raise TypeError(init)
+
 
 # Transform python log integers to log4j, log4net numbers, as used in fortran
 LEVELS_PY2F = {

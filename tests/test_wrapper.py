@@ -84,15 +84,15 @@ class TestCase(unittest.TestCase):
                 model.set_var(name, zeros)
                 arr_a = model.get_var(name)
                 npt.assert_allclose(arr_a, zeros)
+
     def test_set_var_slice(self):
         with self.wrapper as model:
-            arr1 = model.get_var('arr1').copy()
-            values = np.array([5], dtype=arr1.dtype)
+            a = model.get_var('arr1').copy()
+            values = np.array([5], dtype=a.dtype)
             model.set_var_slice('arr1', (0,), (1,), values)
-            arr1a = model.get_var('arr1')
-            arr1[0] = 5
-            logger.info(arr1a)
-            npt.assert_allclose(arr1a, arr1)
+            b = model.get_var('arr1')
+            a[0] = 5
+            npt.assert_allclose(a, b)
 
     def test_set_logger(self):
         self.wrapper = bmi.wrapper.BMIWrapper(engine="modelc",
@@ -103,6 +103,15 @@ class TestCase(unittest.TestCase):
         with self.wrapper as model:
             self.assertEqual(0, model.get_current_time())
             model.update()
+
+
+class TestCreateStringBuffer(unittest.TestCase):
+    def test_create_string_buffer(self):
+        bmi.wrapper.create_string_buffer(4)
+        bmi.wrapper.create_string_buffer(b'test')
+        bmi.wrapper.create_string_buffer('test')
+        bmi.wrapper.create_string_buffer(u'test')
+
 
 
 if __name__ == '__main__':

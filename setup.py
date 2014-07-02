@@ -15,8 +15,7 @@ install_requires = [
     'pandas',
     'psutil',
     'docopts',
-    'rainbow_logging_handler',
-    'faulthandler'
+    'rainbow_logging_handler'
 ]
 
 if sys.version_info[0] < 3:
