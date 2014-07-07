@@ -8,16 +8,15 @@ import functools
 import io
 import logging
 import os
-import multiprocessing          # for shared memory
 import platform
 import sys
-
-import six
 import faulthandler
 
+import six
 from numpy.ctypeslib import ndpointer  # nd arrays
 import numpy as np
 import pandas
+from bmi.api import IBmi
 
 logger = logging.getLogger(__name__)
 
@@ -184,7 +183,7 @@ except AttributeError:
     pass
 
 
-class BMIWrapper(object):
+class BMIWrapper(IBmi):
 
     """Wrapper around a ctypes-loaded BMI library.
 
