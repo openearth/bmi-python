@@ -221,7 +221,7 @@ class BMIWrapper(object):
         '/usr/lib',
     ]
 
-    def __init__(self, engine, configfile):
+    def __init__(self, engine, configfile=None):
         """Initialize the class.
 
         The ``engine`` argument should be the path to a model's ``engine``
@@ -234,9 +234,10 @@ class BMIWrapper(object):
         :meth:`initialize` method.
         """
         self.engine = engine
-        self.configfile = configfile
         self.original_dir = os.getcwd()
 
+        if configfile is not None:
+            self.configfile = configfile
         self.known_paths.append('/opt/{}/lib'.format(self.engine))
         self.library = self._load_library()
 
@@ -316,7 +317,7 @@ class BMIWrapper(object):
         return result
 
 
-    def initialize(self):
+    def initialize(self, configfile=None):
         """Initialize and load the Fortran library (and model, if applicable).
 
         The Fortran library is loaded and ctypes is used to annotate functions
@@ -327,6 +328,13 @@ class BMIWrapper(object):
         :meth:`_load_model` changes the working directory to that of the model.
 
         """
+
+        if configfile is not None:
+            self.configfile = configfile
+        try:
+            self.configfile
+        except AttributeError:
+            raise ValueError("Specify configfile during construction or during initialize")
         os.chdir(os.path.dirname(self.configfile) or '.')
         logmsg = "Loading model {} in directory {}".format(
             self.configfile,
