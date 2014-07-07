@@ -6,7 +6,7 @@ class IBmi(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def initialize(self):
+    def initialize(self, configfile=None):
         """
         Initialize and load the Fortran library (and model, if applicable).
         The Fortran library is loaded and ctypes is used to annotate functions
@@ -35,13 +35,6 @@ class IBmi(object):
         pass
 
     @abstractmethod
-    def set_logger(self, logger):
-        """
-        subscribe to fortran log messages
-        """
-        pass
-
-    @abstractmethod
     def get_var_count(self):
         """
         Return number of variables
@@ -60,21 +53,21 @@ class IBmi(object):
         """
         Return type string, compatible with numpy.
         """
-        pass
+        return self.get_var(name).dtype
 
     @abstractmethod
     def get_var_rank(self, name):
         """
         Return array rank or 0 for scalar.
         """
-        pass
+        return len(self.get_var(name).shape)
 
     @abstractmethod
     def get_var_shape(self, name):
         """
         Return shape of the array.
         """
-        pass
+        return self.get_var(name).shape
 
     @abstractmethod
     def get_start_time(self):
@@ -106,16 +99,31 @@ class IBmi(object):
 
     @abstractmethod
     def set_var(self, name, var):
+        """Set the variable name with the values of var"""
         pass
 
     @abstractmethod
     def set_var_slice(self, name, start, count, var):
-        pass
+        """
+        Overwrite the values in variable name with data
+        from var, in the range (start:start+count).
+        Start, count can be integers for rank 1, and can be
+        tuples of integers for higher ranks.
+        """
+        tmp = self.get_var(name).copy()
+        try:
+            # if we have start and count as a number we can do this
+            tmp[start:(start+count)] = var
+        except:
+            # otherwise we have to loop over all dimensions
+            slices = [np.s_[i:(i+n)] for i,n in zip(start, count)]
+            tmp[slices]
+        self.set_var(name, name, tmp)
 
     @abstractmethod
     def inq_compound(self, name):
         """
-        Return the number of fields and size (not yet) of a compound type.
+        Return the number of fields of a compound type.
         """
         pass
 
@@ -126,13 +134,3 @@ class IBmi(object):
         """
         pass
 
-    @abstractmethod
-    def make_compound_ctype(self, varname):
-        """
-        Create a ctypes type that corresponds to a compound type in memory.
-        """
-        pass
-
-    @abstractmethod
-    def set_structure_field(self, name, id, field, value):
-        pass
