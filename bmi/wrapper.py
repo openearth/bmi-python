@@ -308,7 +308,7 @@ class BMIWrapper(IBmi):
             os.chdir(library_dir)
             win32api.SetDllDirectory('.')
 
-        result = cdll.LoadLibrary(os.path.basename(path))
+        result = cdll.LoadLibrary(path)
 
         if platform.system() == 'Windows':
             os.chdir(olddir)
