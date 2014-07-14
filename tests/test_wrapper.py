@@ -15,21 +15,22 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 class TestCase(unittest.TestCase):
+    engine = "modelfortran"
     def setUp(self):
-        self.wrapper = bmi.wrapper.BMIWrapper(engine="modelc",
+        self.wrapper = bmi.wrapper.BMIWrapper(engine=self.engine,
                                               configfile="model.ini")
 
     @mock.patch('platform.system', lambda: 'Linux')
     def test_libname1(self):
-        self.assertEquals(self.wrapper._libname(), 'libmodelc.so')
+        self.assertEquals(self.wrapper._libname(), 'lib%s.so' % (self.engine, ))
 
     @mock.patch('platform.system', lambda: 'Darwin')
     def test_libname2(self):
-        self.assertEquals(self.wrapper._libname(), 'libmodelc.dylib')
+        self.assertEquals(self.wrapper._libname(), 'lib%s.dylib' % (self.engine, ))
 
     @mock.patch('platform.system', lambda: 'Windows')
     def test_libname3(self):
-        self.assertEquals(self.wrapper._libname(), 'modelc.dll')
+        self.assertEquals(self.wrapper._libname(), '%s.dll' % (self.engine, ))
 
     def test_initialize(self):
         self.wrapper.initialize()
