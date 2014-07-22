@@ -544,6 +544,16 @@ class BMIWrapper(IBmi):
         self.library.get_current_time(byref(current_time))
         return current_time.value
 
+    def get_time_step(self):
+        """
+        returns current time step of simulation
+        """
+        time_step = c_double()
+        self.library.get_time_step.argtypes = [POINTER(c_double)]
+        self.library.get_time_step.restype = None
+        self.library.get_time_step(byref(time_step))
+        return time_step.value
+
     def get_var(self, name):
         """Return an nd array from model library"""
         # How many dimensions.
