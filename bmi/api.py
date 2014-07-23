@@ -109,6 +109,8 @@ class IBmi(object):
         from var, in the range (start:start+count).
         Start, count can be integers for rank 1, and can be
         tuples of integers for higher ranks.
+        For some implementations it can be equivalent and more efficient to do:
+        `get_var(name)[start[0]:start[0]+count[0], ..., start[n]:start[n]+count[n]] = var`
         """
         tmp = self.get_var(name).copy()
         try:
@@ -118,6 +120,21 @@ class IBmi(object):
             # otherwise we have to loop over all dimensions
             slices = [np.s_[i:(i+n)] for i,n in zip(start, count)]
             tmp[slices]
+        self.set_var(name, name, tmp)
+
+    @abstractmethod
+    def set_var_index(self, name, index, var):
+        """
+        Overwrite the values in variable "name" with data
+        from var, at the flattened (C-contiguous style)
+        indices. Indices is a vector of 0-based
+        integers, of the same length as the vector var.
+        For some implementations it can be equivalent
+        and more efficient to do:
+        `get_var(name).flat[index] = var`
+        """
+        tmp = self.get_var(name).copy()
+        tmp.flat[index] = var
         self.set_var(name, name, tmp)
 
     @abstractmethod

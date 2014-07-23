@@ -618,6 +618,9 @@ class BMIWrapper(IBmi):
         set_var_slice(c_name, c_start, c_count, ptr)
 
 
+    def set_var_index(self, name, index, var):
+        super(self).set_var_index(name, index, var)
+
     def set_structure_field(self, name, id, field, value):
         # This only works for 1d
         rank = self.get_var_rank(name)

@@ -16,11 +16,16 @@ Options:
     --info            display information about the model
 """
 import logging
+import os
+import signal
 
 import docopt
+import psutil
+import pandas
 
 from .wrapper import BMIWrapper
 from . import __version__
+
 
 
 # do colorlogs here
@@ -45,17 +50,23 @@ def colorlogs(format="short"):
         # rainbow logger not found, that's ok
         pass
 
-def info(model):
-    n = model.get_var_count()
-    logging.info("variables (%s):", n)
-    for i in range(n):
-        name = model.get_var_name(i)
-        rank = model.get_var_rank(name)
-        type = model.get_var_type(name)
-        shape = model.get_var_shape(name)
-        vartxt = "%s" % (model.get_var(name), )
-        msg = "{name} ({rank}D, {shape}, {type}):\n{vartxt}"
-        logging.debug(msg.format(**locals()))
+def get_size(start_path = '.'):
+    total_size = 0
+    for dirpath, dirnames, filenames in os.walk(start_path):
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            total_size += os.path.getsize(fp)
+    return total_size
+
+def trace(model):
+    dirname = os.path.dirname(os.path.abspath(model.configfile))
+    usage = get_size(dirname)
+    pid = os.getpid()
+    process = psutil.Process(pid)
+    memory = process.memory_info()._asdict()
+    info = dict(usage=usage)
+    info.update(memory)
+    return pandas.Series(info)
 
 
 def main():
@@ -75,15 +86,34 @@ def main():
     if not arguments['--disable-logger']:
         logging.root.setLevel(logging.DEBUG)
         wrapper.set_logger(logging.root)
+
     with wrapper as model:
+        # if siginfo is supported by OS (BSD)
+        def handler(signum, frame):
+            """report progress information"""
+            t_start = model.get_start_time()
+            t_end = model.get_end_time()
+            t_current = model.get_current_time()
+            total = (t_end - t_start)
+            now = (t_current - t_start)
+            if total > 0:
+                logging.info("progress: %s%%", 100.0 * now / total)
+            else:
+                logging.info("progress: unknown")
+
+        if hasattr(signal, 'SIGINFO'):
+            # attach a siginfo handler (CTRL-t) to print progress
+            signal.signal(signal.SIGINFO, handler)
+
         if arguments['--info']:
-            info(model)
+            logging.info("%s", trace(model))
         t_end = model.get_end_time()
         t = model.get_start_time()
         while t < t_end:
             t = model.get_current_time()
             model.update(-1)
-
+        if arguments['--info']:
+            logging.info("%s", trace(model))
 
 if __name__ == '__main__':
     main()
