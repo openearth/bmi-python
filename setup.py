@@ -16,7 +16,8 @@ install_requires = [
     'psutil',
     'docopts',
     'six',
-    'rainbow_logging_handler'
+    # 2.2.1 is broken: https://github.com/laysakura/rainbow_logging_handler/issues/7
+    'rainbow_logging_handler<2.2.1'
 ]
 
 if sys.version_info[0] < 3:
