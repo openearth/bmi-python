@@ -110,8 +110,8 @@ def main():
         t_end = model.get_end_time()
         t = model.get_start_time()
         while t < t_end:
-            t = model.get_current_time()
             model.update(-1)
+            t = model.get_current_time()
         if arguments['--info']:
             logging.info("%s", trace(model))
 
