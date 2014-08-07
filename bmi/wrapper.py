@@ -670,7 +670,11 @@ class BMIWrapper(IBmi):
         """subscribe to fortran log messages"""
 
         # we don't expect anything back
-        self.library.set_logger.restype = None
+        try:
+            self.library.set_logger.restype = None
+        except AttributeError:
+            logger.warn("Tried to set logger but method is not implemented in %s", self.engine)
+            return
         # as an argument we need a pointer to a fortran log func...
         self.library.set_logger.argtypes = [
             (fortran_log_functype)]
