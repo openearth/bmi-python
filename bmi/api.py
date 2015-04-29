@@ -102,7 +102,6 @@ class IBmi(object):
         """Set the variable name with the values of var"""
         pass
 
-    @abstractmethod
     def set_var_slice(self, name, start, count, var):
         """
         Overwrite the values in variable name with data
@@ -122,7 +121,6 @@ class IBmi(object):
             tmp[slices]
         self.set_var(name, name, tmp)
 
-    @abstractmethod
     def set_var_index(self, name, index, var):
         """
         Overwrite the values in variable "name" with data
