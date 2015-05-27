@@ -48,21 +48,18 @@ class IBmi(object):
         """
         pass
 
-    @abstractmethod
     def get_var_type(self, name):
         """
         Return type string, compatible with numpy.
         """
         return self.get_var(name).dtype
 
-    @abstractmethod
     def get_var_rank(self, name):
         """
         Return array rank or 0 for scalar.
         """
         return len(self.get_var(name).shape)
 
-    @abstractmethod
     def get_var_shape(self, name):
         """
         Return shape of the array.
