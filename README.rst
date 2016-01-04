@@ -5,6 +5,9 @@ This is ctypes wrapper for BMI models.
 
 The BMI_ describes a low level interface for numerical models.
 
+.. image:: https://travis-ci.org/openearth/bmi-python.svg?branch=master
+    :target: https://travis-ci.org/openearth/bmi-python
+    
 Origin
 ------
 This module is based on code from:
