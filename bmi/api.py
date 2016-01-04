@@ -6,6 +6,17 @@ class IBmi(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
+    def __init__(self, engine, configfile=None, *args, **kwargs):
+        """
+        Construct a new BMI model. Always pass the engine as a configure
+        parameter. The configfile can also be passed at this stage
+        (for example if you want to use a with statement). You can
+        reinitialize with a new configfile by calling initialize
+
+        """
+        pass
+
+    @abstractmethod
     def initialize(self, configfile=None):
         """
         Initialize and load the Fortran library (and model, if applicable).
@@ -145,4 +156,3 @@ class IBmi(object):
         Lookup the type,rank and shape of a compound field
         """
         pass
-
