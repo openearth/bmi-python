@@ -5,4 +5,4 @@ python:
 # command to install dependencies
 install: "pip install -e ."
 # command to run tests
-script: nosetests test_ibmi.py
+script: nosetests tests/test_ibmi.py
