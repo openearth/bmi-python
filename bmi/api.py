@@ -1,9 +1,11 @@
 from abc import abstractmethod
 from abc import ABCMeta
 
+from six import with_metaclass
 
-class IBmi(object):
-    __metaclass__ = ABCMeta
+
+# class IBmi(object, metaclass=ABCMeta) can be written
+class IBmi(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def initialize(self, configfile=None):
@@ -145,4 +147,3 @@ class IBmi(object):
         Lookup the type,rank and shape of a compound field
         """
         pass
-
