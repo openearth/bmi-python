@@ -10,6 +10,9 @@ import logging
 import os
 import platform
 import sys
+if not hasattr(sys,'frozen'):
+    import faulthandler
+
 import six
 from numpy.ctypeslib import ndpointer  # nd arrays
 import numpy as np
@@ -170,7 +173,14 @@ SHAPEARRAY = ndpointer(dtype='int32',
                        shape=(MAXDIMS,),
                        flags='F')
 
-
+if not hasattr(sys,'frozen'):
+    try:
+        faulthandler.enable()
+    except io.UnsupportedOperation:
+        # In notebooks faulthandler does not work.
+        pass
+    except AttributeError: # In notebooks faulthandler does not work.
+        pass
 
 class BMIWrapper(IBmi):
 
