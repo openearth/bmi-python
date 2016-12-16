@@ -10,15 +10,13 @@ import logging
 import os
 import platform
 import sys
-import faulthandler
 
 import six
 from numpy.ctypeslib import ndpointer  # nd arrays
 import numpy as np
 import pandas
-from bmi.api import IBmi
 
-logger = logging.getLogger(__name__)
+from bmi.api import IBmi
 
 from ctypes import (
     # Types
@@ -31,6 +29,13 @@ from ctypes import (
     # Loading
     cdll
 )
+
+
+if not hasattr(sys, 'frozen'):
+    import faulthandler
+
+
+logger = logging.getLogger(__name__)
 
 
 def create_string_buffer(init, size=None, encoding=sys.getdefaultencoding()):
@@ -172,15 +177,15 @@ SHAPEARRAY = ndpointer(dtype='int32',
                        shape=(MAXDIMS,),
                        flags='F')
 
-
-try:
-    faulthandler.enable()
-except io.UnsupportedOperation:
+if not hasattr(sys, 'frozen'):
+    try:
+        faulthandler.enable()
+    except io.UnsupportedOperation:
+        # In notebooks faulthandler does not work.
+        pass
     # In notebooks faulthandler does not work.
-    pass
-except AttributeError:
-    # In notebooks faulthandler does not work.
-    pass
+    except AttributeError:
+        pass
 
 
 class BMIWrapper(IBmi):

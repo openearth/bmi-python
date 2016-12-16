@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import sys
 
-version = '0.1'
+version = '0.2'
 
 long_description = '\n\n'.join([
     open('README.rst').read(),
@@ -43,7 +43,8 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4'
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5'
     ],
     keywords=["hydrodynamic", "simulation", "flooding", "BMI"],
     author='Fedor Baart',

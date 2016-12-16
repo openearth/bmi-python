@@ -1,3 +1,7 @@
+import sys
 import pkg_resources
 
-__version__ = pkg_resources.get_distribution("bmi").version
+if hasattr(sys, "frozen"):
+    __version__ = '0.2'
+else:
+    __version__ = pkg_resources.get_distribution("bmi").version
