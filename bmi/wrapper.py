@@ -334,6 +334,7 @@ class BMIWrapper(IBmi):
             self.configfile
         except AttributeError:
             raise ValueError("Specify configfile during construction or during initialize")
+        abs_name = os.path.abspath(self.configfile)
         os.chdir(os.path.dirname(self.configfile) or '.')
         logmsg = "Loading model {} in directory {}".format(
             self.configfile,
@@ -343,7 +344,9 @@ class BMIWrapper(IBmi):
         # Fortran init function.
         self.library.initialize.argtypes = [c_char_p]
         self.library.initialize.restype = None
-        ierr = wrap(self.library.initialize)(os.path.abspath(self.configfile))
+        # initialize by abs_name because we already chdirred
+        # if configfile is a relative path  we would have a problem
+        ierr = wrap(self.library.initialize)(abs_name)
         if ierr:
             errormsg = "Loading model {config} failed with exit code {code}"
             raise RuntimeError(errormsg.format(config=self.configfile,
