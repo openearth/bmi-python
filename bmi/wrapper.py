@@ -382,6 +382,9 @@ class BMIWrapper(IBmi):
         """
         self.library.update.argtypes = [c_double]
         self.library.update.restype = c_int
+        if dt == -1:
+            # use default timestep
+            dt = self.get_time_step()
         result = wrap(self.library.update)(dt)
         return result
 
@@ -443,7 +446,7 @@ class BMIWrapper(IBmi):
                               ndim=1,
                               shape=(MAXDIMS, ),
                               flags='F')
-        shape = np.empty((MAXDIMS, ), dtype='int32', order='fortran')
+        shape = np.empty((MAXDIMS, ), dtype='int32', order='F')
         self.library.inq_compound_field.argtypes = [c_char_p,
                                                     POINTER(c_int),
                                                     c_char_p,
@@ -517,7 +520,7 @@ class BMIWrapper(IBmi):
                               ndim=1,
                               shape=(MAXDIMS, ),
                               flags='F')
-        shape = np.empty((MAXDIMS, ), dtype='int32', order='fortran')
+        shape = np.empty((MAXDIMS, ), dtype='int32', order='F')
         self.library.get_var_shape.argtypes = [c_char_p, arraytype]
         self.library.get_var_shape(name, shape)
         return tuple(shape[:rank])
@@ -567,7 +570,7 @@ class BMIWrapper(IBmi):
         # How many dimensions.
         rank = self.get_var_rank(name)
         # The shape array is fixed size
-        shape = np.empty((MAXDIMS, ), dtype='int32', order='fortran')
+        shape = np.empty((MAXDIMS, ), dtype='int32', order='F')
         shape = self.get_var_shape(name)
         # there should be nothing here...
         assert sum(shape[rank:]) == 0
@@ -582,6 +585,9 @@ class BMIWrapper(IBmi):
                                   ndim=rank,
                                   shape=shape,
                                   flags='F')
+        # '' or b''
+        elif not type_:
+            raise ValueError('type not found for variable {}'.format(name))
         else:
             arraytype = self.make_compound_ctype(name)
         # Create a pointer to the array type
@@ -634,7 +640,7 @@ class BMIWrapper(IBmi):
         rank = self.get_var_rank(name)
         assert rank == 1
         # The shape array is fixed size
-        shape = np.empty((MAXDIMS, ), dtype='int32', order='fortran')
+        shape = np.empty((MAXDIMS, ), dtype='int32', order='F')
         shape = self.get_var_shape(name)
         # there should be nothing here...
         assert sum(shape[rank:]) == 0

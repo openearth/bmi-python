@@ -22,15 +22,15 @@ class TestCase(unittest.TestCase):
 
     @mock.patch('platform.system', lambda: 'Linux')
     def test_libname1(self):
-        self.assertEquals(self.wrapper._libname(), 'lib%s.so' % (self.engine, ))
+        self.assertEqual(self.wrapper._libname(), 'lib%s.so' % (self.engine, ))
 
     @mock.patch('platform.system', lambda: 'Darwin')
     def test_libname2(self):
-        self.assertEquals(self.wrapper._libname(), 'lib%s.dylib' % (self.engine, ))
+        self.assertEqual(self.wrapper._libname(), 'lib%s.dylib' % (self.engine, ))
 
     @mock.patch('platform.system', lambda: 'Windows')
     def test_libname3(self):
-        self.assertEquals(self.wrapper._libname(), '%s.dll' % (self.engine, ))
+        self.assertEqual(self.wrapper._libname(), '%s.dll' % (self.engine, ))
 
     def test_initialize(self):
         self.wrapper.initialize()
@@ -68,7 +68,7 @@ class TestCase(unittest.TestCase):
     def test_update_twice(self):
         with self.wrapper as model:
             self.assertEqual(0, model.get_current_time())
-            model.update()
+            model.update(1)
             self.assertEqual(1, model.get_current_time())
             model.update(5)
             self.assertEqual(6, model.get_current_time())
@@ -90,8 +90,8 @@ class TestCase(unittest.TestCase):
         with self.wrapper as model:
             a = model.get_var('arr1').copy()
             values = np.array([5], dtype=a.dtype)
-            model.set_var_slice('arr1', (0,), (1,), values)
-            b = model.get_var('arr1')
+            model.set_var_slice('arr1', (0, ), (1,), values.copy())
+            b = model.get_var('arr1').copy()
             a[0] = 5
             npt.assert_allclose(a, b)
 
