@@ -30,7 +30,7 @@ tests_require = [
 ]
 
 setup(
-    name='bmi',
+    name='bmi-python',
     version=version,
     description="Python wrapper for BMI libraries",
     long_description=long_description,
