@@ -12,12 +12,12 @@ long_description = '\n\n'.join([
 install_requires = [
     'setuptools',
     'numpy',
-#    'pandas',
-#    'psutil',
+    #    'pandas',
+    #    'psutil',
     'docopts',
     'six',
     # 2.2.1 is broken: https://github.com/laysakura/rainbow_logging_handler/issues/7
-#    'rainbow_logging_handler<2.2.1'
+    #    'rainbow_logging_handler<2.2.1'
 ]
 
 if sys.version_info[0] < 3:
@@ -29,10 +29,12 @@ tests_require = [
     'coverage'
 ]
 
-setupversion=version,
-description="Python wrapper for BMI libraries",
-long_description=long_description,
-# Get strings from http://www.python.org/pypi?%3Aaction=list_classifiers
+setup(
+    name="bmi-python",
+    version=version,
+    description="Python wrapper for BMI libraries",
+    long_description=long_description,
+    # Get strings from http://www.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         "Intended Audience :: Science/Research"
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
@@ -41,7 +43,6 @@ long_description=long_description,
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5'
     ],
     keywords=["hydrodynamic", "simulation", "flooding", "BMI"],
@@ -65,3 +66,4 @@ long_description=long_description,
         '{0} = bmi.runner:main'.format(
             'bmi-runner')
     ]}
+)
