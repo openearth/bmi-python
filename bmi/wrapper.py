@@ -629,7 +629,6 @@ class BMIWrapper(IBmi):
         c_count = (c_int*rank)(*count)
         set_var_slice(c_name, c_start, c_count, ptr)
 
-
     def set_var_index(self, name, index, var):
         super(self).set_var_index(name, index, var)
 
@@ -692,6 +691,18 @@ class BMIWrapper(IBmi):
             (fortran_log_functype)]
 
         self.library.set_logger(fortran_log_func)
+
+    def set_current_time(self, current_time):
+        """
+        sets current time of simulation
+        """
+        current_time = c_double(current_time)
+        try:
+            self.library.set_current_time.argtypes = [POINTER(c_double)]
+            self.library.set_current_time.restype = None
+            self.library.set_current_time(byref(current_time))
+        except AttributeError:
+            logger.warn("Tried to set current time but method is not implemented in %s", self.engine)
 
     def __enter__(self):
         """Return the decorated instance upon entering the ``with`` block.
