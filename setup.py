@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import sys
 
-version = 'version='0.2.2''
+version = '0.2.2'
 
 long_description = '\n\n'.join([
     open('README.rst').read(),
@@ -29,12 +29,10 @@ tests_require = [
     'coverage'
 ]
 
-setup(
-    name='bmi-python',
-    version=version,
-    description="Python wrapper for BMI libraries",
-    long_description=long_description,
-    # Get strings from http://www.python.org/pypi?%3Aaction=list_classifiers
+setupversion=version,
+description="Python wrapper for BMI libraries",
+long_description=long_description,
+# Get strings from http://www.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         "Intended Audience :: Science/Research"
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
@@ -55,10 +53,10 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=install_requires,
-#    setup_requires=[
-#        'sphinx',
-#        'sphinx_rtd_theme'
-#    ],
+    #    setup_requires=[
+    #        'sphinx',
+    #        'sphinx_rtd_theme'
+    #    ],
 
     tests_require=tests_require,
     extras_require={'test': tests_require},
@@ -67,4 +65,3 @@ setup(
         '{0} = bmi.runner:main'.format(
             'bmi-runner')
     ]}
-)
