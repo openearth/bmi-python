@@ -14,7 +14,6 @@ import sys
 import six
 from numpy.ctypeslib import ndpointer  # nd arrays
 import numpy as np
-import pandas
 
 from bmi.api import IBmi
 
@@ -132,14 +131,19 @@ def structs2records(structs):
 
 def structs2pandas(structs):
     """convert ctypes structure or structure array to pandas data frame"""
-    records = list(structs2records(structs))
-    df = pandas.DataFrame.from_records(records)
-    # TODO: do this for string columns, for now just for id
-    # How can we check for string columns, this is not nice:
-    # df.columns[df.dtypes == object]
-    if 'id' in df:
-        df["id"] = df["id"].apply(str.rstrip)
-    return df
+    try:
+        import pandas
+        records = list(structs2records(structs))
+        df = pandas.DataFrame.from_records(records)
+        # TODO: do this for string columns, for now just for id
+        # How can we check for string columns, this is not nice:
+        # df.columns[df.dtypes == object]
+        if 'id' in df:
+            df["id"] = df["id"].apply(str.rstrip)
+        return df
+    except ImportError:
+        # pandas not found, that's ok        
+        return structs
 
 
 def wrap(func):
@@ -631,7 +635,6 @@ class BMIWrapper(IBmi):
         c_count = (c_int*rank)(*count)
         set_var_slice(c_name, c_start, c_count, ptr)
 
-
     def set_var_index(self, name, index, var):
         super(self).set_var_index(name, index, var)
 
@@ -694,6 +697,18 @@ class BMIWrapper(IBmi):
             (fortran_log_functype)]
 
         self.library.set_logger(fortran_log_func)
+
+    def set_current_time(self, current_time):
+        """
+        sets current time of simulation
+        """
+        current_time = c_double(current_time)
+        try:
+            self.library.set_current_time.argtypes = [POINTER(c_double)]
+            self.library.set_current_time.restype = None
+            self.library.set_current_time(byref(current_time))
+        except AttributeError:
+            logger.warn("Tried to set current time but method is not implemented in %s", self.engine)
 
     def __enter__(self):
         """Return the decorated instance upon entering the ``with`` block.

@@ -20,8 +20,6 @@ import os
 import signal
 
 import docopt
-import psutil
-import pandas
 
 from .wrapper import BMIWrapper
 from . import __version__
@@ -61,12 +59,24 @@ def get_size(start_path = '.'):
 def trace(model):
     dirname = os.path.dirname(os.path.abspath(model.configfile))
     usage = get_size(dirname)
-    pid = os.getpid()
-    process = psutil.Process(pid)
-    memory = process.memory_info()._asdict()
     info = dict(usage=usage)
-    info.update(memory)
-    return pandas.Series(info)
+
+    try:
+        import psutil
+        pid = os.getpid()
+        process = psutil.Process(pid)
+        memory = process.memory_info()._asdict()
+        info.update(memory)
+    except ImportError:
+        # psutil not found, that's ok
+        pass
+    
+    try:
+        import pandas
+        return pandas.Series(info)
+    except ImportError:
+        # pandas not found, that's ok
+        return info
 
 
 def main():
