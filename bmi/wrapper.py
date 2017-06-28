@@ -14,7 +14,6 @@ import sys
 import six
 from numpy.ctypeslib import ndpointer  # nd arrays
 import numpy as np
-import pandas
 
 from bmi.api import IBmi
 
@@ -132,14 +131,19 @@ def structs2records(structs):
 
 def structs2pandas(structs):
     """convert ctypes structure or structure array to pandas data frame"""
-    records = list(structs2records(structs))
-    df = pandas.DataFrame.from_records(records)
-    # TODO: do this for string columns, for now just for id
-    # How can we check for string columns, this is not nice:
-    # df.columns[df.dtypes == object]
-    if 'id' in df:
-        df["id"] = df["id"].apply(str.rstrip)
-    return df
+    try:
+        import pandas
+        records = list(structs2records(structs))
+        df = pandas.DataFrame.from_records(records)
+        # TODO: do this for string columns, for now just for id
+        # How can we check for string columns, this is not nice:
+        # df.columns[df.dtypes == object]
+        if 'id' in df:
+            df["id"] = df["id"].apply(str.rstrip)
+        return df
+    except ImportError:
+        # pandas not found, that's ok        
+        return structs
 
 
 def wrap(func):

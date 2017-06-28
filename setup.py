@@ -12,12 +12,12 @@ long_description = '\n\n'.join([
 install_requires = [
     'setuptools',
     'numpy',
-    'pandas',
-    'psutil',
+#    'pandas',
+#    'psutil',
     'docopts',
     'six',
     # 2.2.1 is broken: https://github.com/laysakura/rainbow_logging_handler/issues/7
-    'rainbow_logging_handler<2.2.1'
+#    'rainbow_logging_handler<2.2.1'
 ]
 
 if sys.version_info[0] < 3:
@@ -55,10 +55,10 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=install_requires,
-    setup_requires=[
-        'sphinx',
-        'sphinx_rtd_theme'
-    ],
+#    setup_requires=[
+#        'sphinx',
+#        'sphinx_rtd_theme'
+#    ],
 
     tests_require=tests_require,
     extras_require={'test': tests_require},
