@@ -36,7 +36,7 @@ setup(
     long_description=long_description,
     # Get strings from http://www.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
-        "Intended Audience :: Science/Research"
+        "Intended Audience :: Science/Research",
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Topic :: Scientific/Engineering",
         "Topic :: Software Development :: Libraries",
