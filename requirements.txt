@@ -9,5 +9,5 @@ psutil==5.2.2
 python-dateutil==2.6.1
 pytz==2017.2
 rainbow-logging-handler==2.2.2
-six==1.6.1
+six==1.10.0
 wsgiref==0.1.2
