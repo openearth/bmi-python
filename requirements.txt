@@ -4,7 +4,7 @@ docopts==0.6.1
 faulthandler==2.6
 logutils==0.3.5
 numpy==1.13.1
-pandas==0.13.1
+pandas==0.20.3
 psutil==2.1.1
 python-dateutil==2.2
 pytz==2014.3
