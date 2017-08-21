@@ -2,7 +2,7 @@ colorama==0.3.9
 docopt==0.6.2
 docopts==0.6.1
 faulthandler==2.6
-logutils==0.3.3
+logutils==0.3.5
 numpy==1.8.1
 pandas==0.13.1
 psutil==2.1.1
