@@ -7,7 +7,7 @@ numpy==1.13.1
 pandas==0.20.3
 psutil==5.2.2
 python-dateutil==2.6.1
-pytz==2014.3
+pytz==2017.2
 rainbow-logging-handler==2.2.0
 six==1.6.1
 wsgiref==0.1.2
