@@ -1,4 +1,4 @@
-colorama==0.3.1
+colorama==0.3.9
 docopt==0.6.1
 docopts==0.6.1
 faulthandler==2.3
