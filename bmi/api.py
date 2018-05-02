@@ -3,6 +3,7 @@ from abc import ABCMeta
 
 from six import with_metaclass
 
+import numpy as np
 
 # class IBmi(object, metaclass=ABCMeta) can be written
 class IBmi(with_metaclass(ABCMeta, object)):
@@ -129,7 +130,7 @@ class IBmi(with_metaclass(ABCMeta, object)):
             # otherwise we have to loop over all dimensions
             slices = [np.s_[i:(i+n)] for i,n in zip(start, count)]
             tmp[slices]
-        self.set_var(name, name, tmp)
+        self.set_var(name, tmp)
 
     def set_var_index(self, name, index, var):
         """
@@ -143,7 +144,7 @@ class IBmi(with_metaclass(ABCMeta, object)):
         """
         tmp = self.get_var(name).copy()
         tmp.flat[index] = var
-        self.set_var(name, name, tmp)
+        self.set_var(name, tmp)
 
     @abstractmethod
     def inq_compound(self, name):
