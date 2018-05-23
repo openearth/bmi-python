@@ -123,13 +123,12 @@ class IBmi(with_metaclass(ABCMeta, object)):
         `get_var(name)[start[0]:start[0]+count[0], ..., start[n]:start[n]+count[n]] = var`
         """
         tmp = self.get_var(name).copy()
-        try:
-            # if we have start and count as a number we can do this
-            tmp[start:(start+count)] = var
-        except:
-            # otherwise we have to loop over all dimensions
-            slices = [np.s_[i:(i+n)] for i,n in zip(start, count)]
-            tmp[slices]
+        # sometimes we want to slice in 1 dimension, sometimes in more
+        # always slice in arrays
+        start = np.atleast_1d(start)
+        count = np.atleast_1d(count)
+        slices = [np.s_[i:(i+n)] for i,n in zip(start, count)]
+        tmp[slices] = var
         self.set_var(name, tmp)
 
     def set_var_index(self, name, index, var):
