@@ -610,7 +610,12 @@ class BMIWrapper(IBmi):
 
         if is_numpytype:
             # for now always a pointer, see python-subgrid for advanced examples
-            array = np.ctypeslib.as_array(data)
+            #  For  numpy >= 1.16
+            if hasattr(data, 'contents'):
+                array = data.contents
+            # for numpy <= 1.14
+            else:
+                array = np.ctypeslib.as_array(data)
         else:
             array = structs2pandas(data.contents)
 
