@@ -7,7 +7,7 @@ The BMI_ describes a low level interface for numerical models.
 
 .. image:: https://travis-ci.org/openearth/bmi-python.svg?branch=master
     :target: https://travis-ci.org/openearth/bmi-python
-    
+
 Origin
 ------
 This module is based on code from:
@@ -56,7 +56,7 @@ The virtualenv way (assumes virtualenvwrapper and virtualenv are installed)::
   mkvirtualenv main
   workon main
   # get the version from pypi
-  pip install bmi
+  pip install bmi-python
   # or if you want to add your source directory to the path
   pip install -e .
 
