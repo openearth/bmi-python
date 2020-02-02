@@ -79,8 +79,8 @@ manager, so with a ``with`` statement::
         # model is the actual library.
         model.something()
 
-The second way is by calling :meth:`start` and :meth:`stop` yourself and
-using the :attr:`library` attribute to access the Fortran library::
+The second way is by calling `start` and `stop` yourself and
+using the `library` attribute to access the Fortran library::
 
     wrapper = BMIWrapper(engine="model", configfile='/full/path/model.mdu')
     wrapper.start()

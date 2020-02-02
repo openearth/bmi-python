@@ -34,6 +34,7 @@ setup(
     version=version,
     description="Python wrapper for BMI libraries",
     long_description=long_description,
+    long_description_content_type='text/x_rst',
     # Get strings from http://www.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         "Intended Audience :: Science/Research",
